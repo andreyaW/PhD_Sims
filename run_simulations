@@ -1,0 +1,12 @@
+import random
+
+def simulate_system_failure():
+    time_to_failure = 0
+    while True:
+       
+        if random.random() < 0.1:  # 10% chance of failure at each step
+            break
+    return time_to_failure
+
+failure_time = simulate_system_failure()
+print(f"System failed after {failure_time:.2f} time units.")
