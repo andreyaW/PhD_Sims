@@ -1,5 +1,11 @@
 import scipy as sp
+import numpy as np
+import matplotlib.pyplot as plt
+
 from Model.utils import calculator as calc
+from reliability.Distributions import Weibull_Distribution
+from reliability.Distributions import Exponential_Distribution
+
 
 class Series_Component: 
     ''' A simple series component object with a random failure distribution of size n '''
@@ -29,7 +35,6 @@ class Series_Component:
         self.parallel = False                                   # components are intiially assumed to be in series  
         self.added_in_parallel = False                          # a flag for system class (will make system skip parts after they have been added)
         self.parallel_comps = []                                # assuming the component is in series and therfore has no parallel counterparts
-        self.generate_comp()                                    # initialization function which will create initial component failure distribution
 
         # Size and Weight Parameters
         self.weight = 0                                         # weight of the component
@@ -81,7 +86,33 @@ class Series_Component:
 
     # ------------------------------------------------------------------------------------------------------------------------------------------------ #
     # Component Health Assesment Functions
-    def report_state(self):
+
+    def simulate(self):
+        ''' Simulates the health curve of the component over time
+        Params:
+            None
+        Returns:
+            None
+        '''
+
+        # create an increaseing hazard rate
+        hazard_low = 10
+        hazard_high = 100
+        self.hazard_rate = np.linspace(hazard_low, hazard_high, self.sample_size)
+        
+        # generate the component distrubution as a function of time
+        
+        # self.generate_comp()
+
+        # plot the component health curve
+        plt.plot(self.t, self.R_t, label=self.obj_name)
+        plt.xlabel('Time')
+        plt.ylabel('Reliability')
+        plt.title('Component Health Curve')
+
+        
+    
+    def report_state(self, time):
         ''' Returns the output signal of the component at a given time
         Params:
             time (float) : 
@@ -90,7 +121,7 @@ class Series_Component:
             signal (int) : 
                 the signal of the component at the given time
         '''
-        signal = 1000 
+        signal = self.health_curve[0]
 
         return signal
 
@@ -101,8 +132,7 @@ class Series_Component:
         Returns:
             None
         '''
-        # update the state of the component based on the maintenance actions or events that have occured
-
+        # update the state of the component based on the maintenance actions or events that have occured    
 
         # **** To Do ****
 
