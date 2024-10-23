@@ -16,12 +16,13 @@ class markovChain:
         '''
         self.num_states = N
 
-        # check for a properly defined transition matrix (sum across each row should be 1)
-        for i in range(transition_matrix.shape[1]):
-            row = transition_matrix[i, :]
-            if sum(row) != 1.0:
-                raise (ValueError("The transition matrix must sum to 1 for each state (across each row)"))
+        # # check for a properly defined transition matrix (sum across each row should be 1)
+        # for i in range(transition_matrix.shape[1]):
+        #     row = transition_matrix[i, :]
+        #     if sum(row) != 1.0:
+        #         raise (ValueError("The transition matrix must sum to 1 for each state (across each row)"))
         self.transition_matrix = transition_matrix
+        
 
         # initialize the state space
         self.state_space = self.define_state_space(N)
@@ -31,7 +32,6 @@ class markovChain:
             initial_state = self.state_space[initial_state]    
     
         self.current_state = initial_state
-
 
 
     def define_state_space(self, N):
@@ -59,15 +59,13 @@ class markovChain:
             for key, value in state_space.items():
                 
                 if current_state == value:
-                    print(i)
-                    
                     transition_probs = self.transition_matrix[key]
                     possible_states = [k for k in state_space.keys()]
                     next_state_idx = np.random.choice(possible_states, replace= True, p=transition_probs)
                     prob *= transition_probs[next_state_idx]
 
-                    current_state = state_space[next_state_idx]
-                    states_list.append(current_state)              
+            current_state = state_space[next_state_idx]
+            states_list.append(current_state)              
             i +=1 
         self.current_state = current_state
 
@@ -77,10 +75,3 @@ class markovChain:
 
 
 # ---------------------------------------------------------------------
-
-N= 3
-transition_matrix = np.array([[0.1, 0.3, 0.6], 
-                              [0.2, 0.3, 0.5], 
-                              [0.4, 0.5, 0.1]])
-sensor = markovChain(3, transition_matrix)
-sensor.forecast(5)
