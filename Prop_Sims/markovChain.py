@@ -32,6 +32,7 @@ class markovChain:
             initial_state = self.state_space[initial_state]    
     
         self.current_state = initial_state
+        self.current_state_prob = 1         # 100% chance of starting at the designated inital state
 
 
     def define_state_space(self, N):
@@ -52,7 +53,7 @@ class markovChain:
         states_list = [current_state]
         print("Start state: " + str(current_state))
 
-        prob = 1
+        prob = self.current_state_prob
         i = 0
         while i != num_steps:
 
@@ -68,10 +69,11 @@ class markovChain:
             states_list.append(current_state)              
             i +=1 
         self.current_state = current_state
-
-        print("Possible states: " + str(states_list))
-        print("End state after " + str(num_steps) + " days: " + str(current_state))
-        print("Probability of the possible sequence of states: " + str(prob))
+        self.current_state_prob = prob
+        
+        # print("Possible states: " + str(states_list))
+        # print("End state after " + str(num_steps) + " days: " + str(current_state))
+        # print("Probability of the possible sequence of states: " + str(prob))
 
 
 # ---------------------------------------------------------------------
