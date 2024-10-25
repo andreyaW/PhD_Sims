@@ -12,19 +12,11 @@ class sensed_comp:
         self.comp = comp
         self.sensors = [sensor(0.98) for i in range(num_sensors)]
         
-    # def save_lookup(self):
-    #     ''' saving the conditional lookup table of comp states and states of all sensors '''         
-
-    #     comp = self.comp
-    #     sensor = self.sensors[0]
-    #     num_comp_states = comp.markov_model.num_states
-    #     num_sensor_states = sensor.markov_model.num_states
-    #     lookup_table = np.zeros((num_comp_states, num_sensor_states))
-    #     lookup_table = 
-    #     #comp.markov_model.current_state_prob * sensor.markov_model.current_state_prob
-
 
     def forecast_state(self, num_days):
+
+        '''determines the component health over instances in time'''
+
         comp = self.comp
         sensor = self.sensors[0]        
         
@@ -33,17 +25,15 @@ class sensed_comp:
         sensor.forecast_state(num_days)
         
         # multiply conditional probabilities 
-        if sensor.markov_model.current_state == "working":
-            
+        if sensor.markov_model.current_state == "working":  
             sensed_comp.current_state = comp.markov_model.current_state       
             sensed_comp.current_state_prob = comp.markov_model.current_state_prob * sensor.markov_model.current_state_prob
-
         else:
-
             sensed_comp.current_state = "NOT DETECTED"
             sensed_comp.current_state_prob = sensor.markov_model.current_state_prob
-
         return f"The sensed component is in state {sensed_comp.current_state} , with probability {sensed_comp.current_state_prob}"
+
+
 
 
 
@@ -61,15 +51,3 @@ class sensed_comp:
         # conditional_lookup[0][0] = sensor.accuracy      # sensor working state equal to sensor accuracy
         # conditional_lookup[0][1:] = state_prob          # equal prob of other sensor states 
         # # conditional_lookup[-1][-1]= 
-
-
-
-
-        # determines the component health for an instance in time
-
-
-# sensor = markovChain(3, transition_matrix)
-# sensor.forecast(5)
-# days= 5
-# test_comp = comp()
-# test_comp.generate_states(days)
