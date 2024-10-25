@@ -51,7 +51,7 @@ class markovChain:
         state_space = self.state_space
         
         states_list = [current_state]
-        print("Start state: " + str(current_state))
+        # print("Start state: " + str(current_state))
 
         prob = self.current_state_prob
         i = 0

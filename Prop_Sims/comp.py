@@ -15,11 +15,11 @@ class comp:
         --------------------------------------------------------------------------
         ''' 
 
-        number_of_states = 3
-        transition_mat = np.array([[0.6, 0.3, 0.1],
-                                    [0.0, 0.5, 0.5],
-                                    [0.0, 0.2, 0.8]])
+        number_of_states = 3 # working, partially working, failed
+        transition_mat = np.array([[0.98, 0.01, 0.01],
+                                    [0.0, 0.98, 0.02],
+                                    [0.0, 0.0,  1.0]])
         self.markov_model = markovChain(number_of_states, transition_mat)
     
-    def update_state(self, num_days):
+    def forecast_state(self, num_days):
         return self.markov_model.forecast(num_days)
