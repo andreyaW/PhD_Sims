@@ -1,5 +1,7 @@
 from comp import *
 from sensor import * 
+from copy import deepcopy
+
 
 import numpy as np
 
@@ -8,30 +10,58 @@ class sensed_comp:
 
     def __init__(self, comp, num_sensors):
 
-        # store the sensor and comp objects to self
+        # store the comp object and possible states to self
         self.comp = comp
+        self.state_space = deepcopy(comp.markov_model.state_space)
+
+        # add sensors to the sensed comp, and add failed sensor state to sensed comp
+        self.num_sensors = num_sensors
         self.sensors = [sensor(0.98) for i in range(num_sensors)]
         
+        val = "sensors failing" 
+        key = len(self.state_space)
+        self.state_space. update( {key: val})
+
 
     def forecast_state(self, num_days):
-
         '''determines the component health over instances in time'''
 
-        comp = self.comp
-        sensor = self.sensors[0]        
-        
         # update component state
-        comp.forecast_state(num_days)
-        sensor.forecast_state(num_days)
+        self.comp.forecast_state(num_days)
+        for i in range(self.num_sensors):
+            self.sensors[i].forecast_state(num_days)
         
-        # multiply conditional probabilities 
-        if sensor.markov_model.current_state == "working":  
-            sensed_comp.current_state = comp.markov_model.current_state       
-            sensed_comp.current_state_prob = comp.markov_model.current_state_prob * sensor.markov_model.current_state_prob
-        else:
-            sensed_comp.current_state = "NOT DETECTED"
-            sensed_comp.current_state_prob = sensor.markov_model.current_state_prob
-        return f"The sensed component is in state {sensed_comp.current_state} , with probability {sensed_comp.current_state_prob}"
+        comp = self.comp.markov_model
+        num_sensors = self.num_sensors
+        sensor = self.sensors[0].markov_model        
+        
+        comp_states = comp.state_space
+        sensor_states = sensor.state_space
+        
+        for j in range (num_days):
+
+            for i in range(num_sensors):            
+                
+                # check that the sensor is working
+                if sensor.current_state == "working":  
+                    
+                    # store the sensed components individual state
+                    sensed_comp.current_state = comp.current_state       
+                    sensed_comp.current_state_prob = comp.current_state_prob * sensor.current_state_prob # multiple conditonal probabilities
+                    for key, val in comp.state_space.items(): 
+                        if val == sensed_comp.current_state:
+                            sensed_comp.current_state_num = key
+                    
+                    # grab the sensor and component specific data
+
+                
+                # give error if sensor is not working
+                else:
+                    sensed_comp.current_state = "NOT DETECTED"
+                    sensed_comp.current_state_prob = sensor.current_state_prob                          # comp not seen on seeing sensor prob of failure
+                    sensed_comp.current_state_num = -1
+        
+        return sensed_comp.current_state, sensed_comp.current_state_num, sensed_comp.current_state_prob
 
 
 

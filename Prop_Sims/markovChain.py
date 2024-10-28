@@ -16,11 +16,11 @@ class markovChain:
         '''
         self.num_states = N
 
-        # # check for a properly defined transition matrix (sum across each row should be 1)
-        # for i in range(transition_matrix.shape[1]):
-        #     row = transition_matrix[i, :]
-        #     if sum(row) != 1.0:
-        #         raise (ValueError("The transition matrix must sum to 1 for each state (across each row)"))
+        # check for a properly defined transition matrix (sum across each row should be 1)
+        for i in range(transition_matrix.shape[1]):
+            row = transition_matrix[i, :]
+            if sum(row) != 1.0:
+                raise (ValueError("The transition matrix must sum to 1 for each state (across each row)"))
         self.transition_matrix = transition_matrix
         
 
@@ -28,11 +28,13 @@ class markovChain:
         self.state_space = self.define_state_space(N)
         
         # the initial space is working unless specified otherwise    
-        if initial_state == 0: 
+        if initial_state != 0: 
             initial_state = self.state_space[initial_state]    
-    
+        else:
+            initial_state = self.state_space[0]             # assumes a initially working state
+        
         self.current_state = initial_state
-        self.current_state_prob = 1         # 100% chance of starting at the designated inital state
+        self.current_state_prob = 1                         # 100% chance of starting at the designated inital state
 
 
     def define_state_space(self, N):
@@ -47,7 +49,7 @@ class markovChain:
     
 
     def forecast(self, num_steps):
-        current_state = self.current_state
+        current_state = self.current_state        
         state_space = self.state_space
         
         states_list = [current_state]
@@ -58,10 +60,11 @@ class markovChain:
         while i != num_steps:
 
             for key, value in state_space.items():
-                
+                # keys is state label #, values is state name
+
                 if current_state == value:
                     transition_probs = self.transition_matrix[key]
-                    possible_states = [k for k in state_space.keys()]
+                    possible_states = list(state_space.keys())                    
                     next_state_idx = np.random.choice(possible_states, replace= True, p=transition_probs)
                     prob *= transition_probs[next_state_idx]
 
