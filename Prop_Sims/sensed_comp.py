@@ -34,16 +34,14 @@ class sensed_comp:
         comp = self.comp.markov_model
         num_sensors = self.num_sensors
         sensor = self.sensors[0].markov_model        
-        
-        comp_states = comp.state_space
-        sensor_states = sensor.state_space
-        
+
+        sensed_comp_states = list(self.state_space.values()) # keys only
         for j in range (num_days):
 
             for i in range(num_sensors):            
                 
                 # check that the sensor is working
-                if sensor.current_state == "working":  
+                if sensor.current_state == sensed_comp_states[0]:  
                     
                     # store the sensed components individual state
                     sensed_comp.current_state = comp.current_state       
@@ -51,15 +49,12 @@ class sensed_comp:
                     for key, val in comp.state_space.items(): 
                         if val == sensed_comp.current_state:
                             sensed_comp.current_state_num = key
-                    
-                    # grab the sensor and component specific data
 
-                
                 # give error if sensor is not working
                 else:
-                    sensed_comp.current_state = "NOT DETECTED"
+                    sensed_comp.current_state = sensed_comp_states[-1]
+                    sensed_comp.current_state_num = len(self.state_space)
                     sensed_comp.current_state_prob = sensor.current_state_prob                          # comp not seen on seeing sensor prob of failure
-                    sensed_comp.current_state_num = -1
         
         return sensed_comp.current_state, sensed_comp.current_state_num, sensed_comp.current_state_prob
 
