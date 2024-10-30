@@ -7,16 +7,20 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-num_test_values = 2
-for k in range(num_test_values):
-    num_test_comps = 10
+max_sensors = 10
+test_transitions = [i+1 for i in range(max_sensors)]
+test_names = [str(i+1) + 'Sensors Attached' for i in range(max_sensors)]
+
+for k in range(len(test_transitions)):
+
+    num_test_comps = 100
     count_working= np.array([])           # sanity check: first value should == num tested comps
     count_failed = np.array([])
     count_undetected = np.array([])
 
     # set up variables to check sensed states over time
-    num_points= 50
-    time_vec = np.linspace(0, 25000, num_points+1)                          # input time array
+    num_points= 10
+    time_vec = np.linspace(0, 5, 10, endpoint=True)                          # input time array
     sensed_comp_states = [[] for i in range(len(time_vec))]     # states are strings, cannot be np. arrays      
     test_count_working = np.zeros_like(time_vec)                                
     test_count_failed = np.zeros_like(time_vec)  
@@ -29,9 +33,8 @@ for k in range(num_test_values):
         for i in range(num_test_comps):
 
             # create a test 'sensed component' object
-            comp1 = comp()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
-            num_sensors = 1
-            test_comp = sensed_comp(comp1, num_sensors)
+            comp1 = comp(test_transitions[k])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+            test_comp = sensed_comp(comp1, 1) # assumes one sensor to start
             
             for j,t in enumerate(time_vec):
 
@@ -41,10 +44,11 @@ for k in range(num_test_values):
                 # calculate parameters of interest to plot
                 state_space = list(test_comp.state_space.values())
                 working_state = state_space[0]
+                partially_working_state = state_space[1]
                 failed_comp_state = state_space[-2]
                 failed_sensor_state = state_space[-1]
 
-                if test_comp.current_state == working_state:
+                if test_comp.current_state == working_state or test_comp.current_state == partially_working_state:
                     test_count_working[j] += 1 
                 
                 elif test_comp.current_state == failed_comp_state:
@@ -53,8 +57,7 @@ for k in range(num_test_values):
                 elif test_comp.current_state == failed_sensor_state:
                     test_count_undetected[j] += 1
                 else:
-                    pass
-                    #print(i+1)
+                    print("!!SOMETHING UNEXPECTED HAS OCCURRED!!")
 
             # append test data to simulate results arrays
             sensed_comp_states = np.array(sensed_comp_states)
@@ -77,7 +80,7 @@ for k in range(num_test_values):
                             })
 
     # plot an write the overall data to different sheets
-    plotter.plot_sensed_comps(results,'bar')
+    plotter.plot_sensed_comps(results, test_names[k], 'bar')
     # plotter.plot_sensed_comps(results,'line')
 
 sheet_name = "Test #"+ str(k+1)

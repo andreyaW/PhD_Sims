@@ -17,6 +17,8 @@ class sensed_comp:
         # add sensors to the sensed comp, and add failed sensor state to sensed comp
         self.num_sensors = num_sensors
         self.sensors = [sensor(0.98) for i in range(num_sensors)]
+        # self.num_sensors = 1
+        # self.sensors = [sensor(0.98)]
         
         val = "sensors failing" 
         key = len(self.state_space)
