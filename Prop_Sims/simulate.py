@@ -18,7 +18,8 @@ for k in range(num_test_values):
     num_points= 50
     time_vec = np.linspace(0, 25000, num_points+1)                          # input time array
     sensed_comp_states = [[] for i in range(len(time_vec))]     # states are strings, cannot be np. arrays      
-    test_count_working = np.zeros_like(time_vec)                                
+    test_count_working = np.zeros_like(time_vec)
+    test_count_partial = np.zeros_like(time_vec)                                
     test_count_failed = np.zeros_like(time_vec)  
     test_count_undetected = np.zeros_like(time_vec)  
 
@@ -53,9 +54,8 @@ for k in range(num_test_values):
                 elif test_comp.current_state == failed_sensor_state:
                     test_count_undetected[j] += 1
                 else:
-                    pass
-                    #print(i+1)
-
+                    test_count_partial[j] +=1
+                    
             # append test data to simulate results arrays
             sensed_comp_states = np.array(sensed_comp_states)
             
@@ -72,6 +72,7 @@ for k in range(num_test_values):
 
     results = pd.DataFrame({
                             'number of working comps' : test_count_working,
+                            'number of partially working comps' : test_count_partial,
                             'number of failed comps' : test_count_failed,
                             'number of failed sensors' : test_count_undetected
                             })
