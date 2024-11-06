@@ -1,6 +1,6 @@
-from comp import *
-from sensor import *
-from sensed_comp import *
+from Prop_Sims.shipModel.comp import *
+from Prop_Sims.shipModel.sensor import *
+from Prop_Sims.shipModel.sensed_comp import *
 from helper_funcs import plotting as plotter
 
 import pandas as pd

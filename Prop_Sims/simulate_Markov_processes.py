@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from comp import comp
+from Prop_Sims.shipModel.comp import comp
 
 # initialize simulation parameters
 num_comps = 100 
