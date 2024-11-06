@@ -7,36 +7,39 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-name1= 'good component'
+name1= 'test result: good component [P_ij]'
 transition_mat1 = np.array([[0.98, 0.01, 0.01],
                             [0.0, 0.98, 0.02],
                             [0.0, 0.0,  1.0]])
 
-name2= 'ok component'
+name2= 'test result: ok component [P_ij]'
 transition_mat2 = np.array([[0.45, 0.45, 0.10],
                             [0.0, 0.90, 0.10],
                             [0.0, 0.0,  1.0]])
 
-name3= 'bad component'
+name3= 'test result: bad component [P_ij]'
 transition_mat3 = np.array([[0.34, 0.33, 0.33],
                             [0.0, 0.5, 0.5],
                             [0.0, 0.0,  1.0]])
 
 test_transitions = [transition_mat1 , transition_mat2, transition_mat3]
 test_names = [name1, name2, name3]
+figures = []
 
-for k in range(len(test_transitions)):
+#for k in range(len(test_transitions)):
+for k in range(1):
 
-    num_test_comps = 100
-    count_working= np.array([])           # sanity check: first value should == num tested comps
+    num_test_comps = 1000
+    count_working= np.array([])                                                 # *sanity check: first value should == num tested comps
     count_failed = np.array([])
     count_undetected = np.array([])
 
     # set up variables to check sensed states over time
     num_points= 10
-    time_vec = np.linspace(0, 5, 10, endpoint=True)                          # input time array
-    sensed_comp_states = [[] for i in range(len(time_vec))]     # states are strings, cannot be np. arrays      
-    test_count_working = np.zeros_like(time_vec)                                
+    time_vec = np.linspace(0, 5, 100, endpoint=True)                            # input time array
+    sensed_comp_states = [[] for i in range(len(time_vec))]                      
+    test_count_working = np.zeros_like(time_vec)
+    test_count_partial = np.zeros_like(time_vec)                                 
     test_count_failed = np.zeros_like(time_vec)  
     test_count_undetected = np.zeros_like(time_vec)  
 
@@ -66,12 +69,12 @@ for k in range(len(test_transitions)):
                     test_count_working[j] += 1 
                 
                 elif test_comp.current_state == failed_comp_state:
-                    test_count_failed[j] += 1 
-                
+                    # test_count_failed[j] += 1 
+                    pass                
                 elif test_comp.current_state == failed_sensor_state:
                     test_count_undetected[j] += 1
                 else:
-                    print("!!SOMETHING UNEXPECTED HAS OCCURRED!!")
+                    test_count_partial[j] +=1                    
 
             # append test data to simulate results arrays
             sensed_comp_states = np.array(sensed_comp_states)
@@ -88,16 +91,20 @@ for k in range(len(test_transitions)):
             idv_result.to_excel(writer, sheet_name=sheet_name, index=False) 
 
     results = pd.DataFrame({
+                            'time' : time_vec,
                             'number of working comps' : test_count_working,
+                            'number of partially working comps' : test_count_partial,
                             'number of failed comps' : test_count_failed,
                             'number of failed sensors' : test_count_undetected
                             })
 
     # plot an write the overall data to different sheets
-    plotter.plot_sensed_comps(results, test_names[k], 'bar')
-    # plotter.plot_sensed_comps(results,'line')
+    figures.append(plotter.plot_sensed_comps(results, test_names[k], 'bar'))
+    figures.append(plotter.plot_sensed_comps(results,test_names[k],'line'))
 
 sheet_name = "Test #"+ str(k+1)
 idv_result.to_excel(writer, sheet_name=sheet_name, index=False) 
 
+# show generated plot
+plotter.plot_multiple_plots(figures)
 plt.show()
