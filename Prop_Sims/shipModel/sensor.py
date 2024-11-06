@@ -40,7 +40,7 @@ class sensor:
 
 
 # ---------------------------------------------------------------------
-    def update_state(self, num_days)-> None:
+    def updateState(self, num_days)-> None:
         """
         Predicts the true state of self after a given number of days
         
@@ -48,7 +48,7 @@ class sensor:
         """
 
         # update then update self attributes
-        self.markov_model.update_state(num_days)
+        self.markov_model.updateState(num_days)
         self.state = self.markov_model.current_state
     
 # ---------------------------------------------------------------------

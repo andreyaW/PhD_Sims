@@ -8,9 +8,10 @@ class sensed_comp:
     ''' a simple model of sensors connected to a component 
         
         EXAMPLE:
-        >>> comp1= comp()             
-        >>> sensors = [sensor(0.98) for i in range(3)]
-        >>> sensed_comp1 = sensed_comp(comp1, sensors)
+        >>> sensed_comp1 = sensed_comp(comp(), [sensor(), sensor(), sensor()])
+        >>> sensed_comp1.state
+        'working'
+        >>> sensed_comp1.update_state(1)
         >>> sensed_comp1.state
         'working'
     
@@ -46,7 +47,7 @@ class sensed_comp:
         self.state= self.comp.state
 
 # ---------------------------------------------------------------------
-    def update_state(self, num_days):
+    def updateState(self, num_days):
         """
         Predicts the true state of self after a given number of days
         
@@ -58,11 +59,11 @@ class sensed_comp:
 
         for j in range (num_days):
 
-            # update states of all attached sensors and the component         
+            # update states of all attached sensors and the component for one day        
             num_sensors = len(self.sensors)
             for i in range(num_sensors):
-                self.sensors[i].update_state(1)
-            self.comp.update_state(1)
+                self.sensors[i].updateState(1)
+            self.comp.updateState(1)
 
             # grab the Markov Models for computation of state transition probability
             comp = self.comp.markov_model
@@ -73,9 +74,8 @@ class sensed_comp:
             detected_states = np.array([comp.current_state for i in range(num_sensors)])
             detected_states = detected_states[count_sensors_working]
 
-
-            if sum(count_sensors_working) > num_sensors/2: 
-                majority_detected = 
+            if sum(count_sensors_working) > num_sensors/2:  
+                majority_detected
                 self.state = majority_detected
             else:
                 self.state = self.state_space[-1]
