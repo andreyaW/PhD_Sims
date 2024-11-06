@@ -15,11 +15,14 @@ class sensor:
 
     '''
 
-    def __init__(self, accuracy):
+    def __init__(self, accuracy=0.98):
         """
         Initialize a sensor object represented as a Markov Chain
+
+        :params accuracy: float the probability of the sensor detecting state correctly
+                                the default is a good sensor (high accuracy)
         """
-        self.accuracy = accuracy
+        self.accuracy = accuracy   
         self.defineMarkovModel()
         
 

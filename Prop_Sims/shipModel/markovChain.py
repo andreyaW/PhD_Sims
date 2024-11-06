@@ -130,3 +130,14 @@ class markovChain:
         # print("Probability of the possible sequence of states: " + str(prob))
 
 # ---------------------------------------------------------------------
+
+    def stateIdxToName(self, idx):
+
+        """
+            Allows a users to quickly go between the state number and state name (for plotting mostly)
+
+            :param stateIdx: int the number of the state in the state space (ex: 0 = working)
+        """
+
+        state_space_dict = self.state_space
+        

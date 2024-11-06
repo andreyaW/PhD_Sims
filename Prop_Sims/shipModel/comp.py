@@ -55,4 +55,4 @@ class comp:
         self.markov_model.update_state(num_days)
         self.state = self.markov_model.current_state
 
-        
+# ---------------------------------------------------------------------
