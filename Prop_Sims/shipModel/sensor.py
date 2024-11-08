@@ -45,6 +45,7 @@ class sensor:
 
 # ---------------------------------------------------------------------
     def updateState(self, num_days)-> None:
+    def updateState(self, num_days)-> None:
         """
         Predicts the true state of self after a given number of days
         

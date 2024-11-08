@@ -30,8 +30,7 @@ class markovChain:
         """
         # self.num_states = num_states
         self.verifyTransitionMatrix(transition_prob) 
-        self.define_state_space(num_states) 
-
+        self.state_space, self.state = self.defineStateSpace(num_states)
 
 # ------------------------------------------------------------------------------------
 
@@ -56,34 +55,36 @@ class markovChain:
 
         self.transition_matrix = transition_matrix
 
-# ------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
 
-    def define_state_space(self, N, initial_state: int = 0) -> None:
+    def defineStateSpace(self, N, initial_state_idx: int = 0) -> None:
         """
         Initialize the state space as a dictionary and pick a random initial state
         
         :param N: int number of states in the state space
+        :param initial_state_idx: the number of the intial state as defined in the state space dictionary 
+                                (defualt is comps current state) 
         """
 
         # default two states (0: working, 1: failed)
         state_name = ["working", "failed"]
 
-        # for Markov Chain w N>2, give intermediate states a default name
+        # for Markov Chain with more than 2 states, give intermediate states a default name
         if N> 2: 
             for i in range(N-2):
                 state_name.insert(-1,"partially working (" + str(i+1) + ")")
 
         # zip state names and numbers to define state space as dictionary
         state_num = [i for i in range(N)]
-        state_space = dict(zip(state_num, state_name))
+        state_space = dict(zip(state_name, state_num))          # keys, values
 
         # the initial state is working (unless specified otherwise)   
-        if initial_state != 0: 
-            initial_state = state_space[initial_state]    
-        else:
-            initial_state = state_space[0]             
+        initial_state_name = self.idxToName(initial_state_idx)
+    
 
-        # save important attributes to self
+        return initial_state_name
+
+        # save important attributes to self       
         self.state_space = state_space
         self.current_state = initial_state
         self.current_state_prob = 1                 # 100% chance of starting at designated inital state
