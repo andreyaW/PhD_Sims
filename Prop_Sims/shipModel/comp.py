@@ -5,7 +5,7 @@ import numpy as np
 class comp:
     
     ''' a simple model of a component object 
-        run with python -i comp.py    
+        To run this file enter in terminal: python -i comp.py    
 
     
         EXAMPLE: 
@@ -50,7 +50,6 @@ class comp:
         self.state_no = mC.stateName2Idx(self.state)        
 
 # ---------------------------------------------------------------------
-    def updateState(self, num_days)-> None:
     def updateState(self, num_days)-> None:
         """
         Predicts the true state of self after a given number of days

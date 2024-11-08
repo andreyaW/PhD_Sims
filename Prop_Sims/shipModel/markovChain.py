@@ -30,7 +30,7 @@ class markovChain:
         """
         # self.num_states = num_states
         self.verifyTransitionMatrix(transition_prob) 
-        self.state_space, self.state = self.defineStateSpace(num_states)
+        self.defineStateSpace(num_states)
 
 # ------------------------------------------------------------------------------------
 
@@ -77,16 +77,11 @@ class markovChain:
         # zip state names and numbers to define state space as dictionary
         state_num = [i for i in range(N)]
         state_space = dict(zip(state_name, state_num))          # keys, values
+        self.state_space = state_space
 
         # the initial state is working (unless specified otherwise)   
-        initial_state_name = self.idxToName(initial_state_idx)
-    
-
-        return initial_state_name
-
-        # save important attributes to self       
-        self.state_space = state_space
-        self.current_state = initial_state
+        initial_state_name = self.stateIdx2Name(initial_state_idx)
+        self.current_state = initial_state_name
         self.current_state_prob = 1                 # 100% chance of starting at designated inital state
 
 

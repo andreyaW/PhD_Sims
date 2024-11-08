@@ -4,7 +4,7 @@ import numpy as np
 class sensor:
 
     ''' a simple model of a sensor object 
-        run with python -i sensor.py    
+        To run this file enter in terminal: python -i sensor.py    
 
     
         EXAMPLE:
@@ -44,7 +44,6 @@ class sensor:
         self.state_no = mC.stateName2Idx(self.state)        
 
 # ---------------------------------------------------------------------
-    def updateState(self, num_days)-> None:
     def updateState(self, num_days)-> None:
         """
         Predicts the true state of self after a given number of days

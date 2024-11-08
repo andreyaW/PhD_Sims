@@ -6,7 +6,7 @@ import numpy as np
 
 class sensedComp:
     ''' a simple model of sensors connected to a component 
-        run with python -i sensedComp.py    
+        To run this file enter in terminal: python -i sensedComp.py    
     
         EXAMPLE: 
         >>> c1= sensed_comp()             
@@ -37,7 +37,7 @@ class sensedComp:
         self.sensors = sensors_list     # default is two "good" sensors
         self.defineMarkovModel()
 
-        
+    # ---------------------------------------------------------------------
     def defineMarkovModel(self)->None:
         """
         Creates a model for self using a markov chain object. the state space for a sensed component is the same state space as the component, plus an additional "undetected" state.
@@ -98,3 +98,5 @@ class sensedComp:
             else:
                 self.state = possible_states[-2]
                 self.state_no = len(self.state_space)-1
+
+# ---------------------------------------------------------------------
