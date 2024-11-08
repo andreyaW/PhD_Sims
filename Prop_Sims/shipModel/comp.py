@@ -5,14 +5,18 @@ import numpy as np
 class comp:
     
     ''' a simple model of a component object 
+        run with python -i comp.py    
+
     
         EXAMPLE: 
-            >>> comp1 = comp()
-            >>> comp1.state
+            >>> c1 = comp()
+            >>> c1.state
             'working'
-            >>> comp1.forecast_state(2) 
-            >>> comp1.state
+            >>> c1.updateState(2) 
+            >>> c1.state
             'working'
+            >>> c1.state_no
+            0
 
     '''
 
@@ -34,17 +38,19 @@ class comp:
         Creates a model for self using a markov chain object
         """
 
-        number_of_states = 3 # working, partially working, failed
+        num_states = 3 # working, partially working, failed
         transition_mat = np.array([[0.98, 0.01, 0.01],
                                     [0.0, 0.98, 0.02],
                                     [0.0, 0.0,  1.0]])
         
         # save important attributes to self 
-        self.markov_model = markovChain(number_of_states, transition_mat)
-        self.state = self.markov_model.current_state
+        mC = markovChain(num_states, transition_mat)
+        self.markov_model = mC
+        self.state = mC.current_state
+        self.state_no = mC.stateName2Idx(self.state)        
 
 # ---------------------------------------------------------------------
-    def update_state(self, num_days)-> None:
+    def updateState(self, num_days)-> None:
         """
         Predicts the true state of self after a given number of days
         
@@ -52,7 +58,9 @@ class comp:
         """
 
         # update then update self attributes
-        self.markov_model.update_state(num_days)
-        self.state = self.markov_model.current_state
-
+        mC = self.markov_model
+        mC.update_state(num_days)
+        self.state = mC.current_state
+        self.state_no = mC.stateName2Idx(mC.current_state)
+        
 # ---------------------------------------------------------------------

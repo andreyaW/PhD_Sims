@@ -1,10 +1,11 @@
 import numpy as np
 
 class markovChain:
+    ''' 
+        a simple model for a markovChain
+        run with python -i markovChain()    
 
-    ''' a simple model for a markovChain
-        
-    
+
         EXAMPLE: 
             >>> mc_model = markovChain()
             >>> mc_model.current_state
@@ -27,7 +28,6 @@ class markovChain:
         :param transition_prob: ndarray matrix of transition probabilities between states
 
         """
-
         # self.num_states = num_states
         self.verifyTransitionMatrix(transition_prob) 
         self.define_state_space(num_states) 
@@ -86,37 +86,37 @@ class markovChain:
         # save important attributes to self
         self.state_space = state_space
         self.current_state = initial_state
-        self.current_state_prob = 1     # 100% chance of starting at designated inital state
-    
+        self.current_state_prob = 1                 # 100% chance of starting at designated inital state
+
+
 # ------------------------------------------------------------------------------------  
     
-    def update_state(self, num_steps) -> None:
+    def update_state(self, num_days) -> None:
         """
         Forecasts the future state of the Markov Model
         
         :param num_days: int number of steps to update the state over
         
         """
-
         current_state = self.current_state        
         state_space = self.state_space
-        
         states_list = [current_state]
-        # print("Start state: " + str(current_state))
-
+        
+        # iterate over the desired number of days 
         prob = self.current_state_prob
         i = 0
-        while i != num_steps:
+        while i != num_days:
 
-            for key, value in state_space.items():
-                # keys is state label #, values is state name
-
+            for key, value in state_space.items(): # keys is state label #, values is state name
+                
+                # determine the current state and the next state 
                 if current_state == value:
                     transition_probs = self.transition_matrix[key]
                     possible_states = list(state_space.keys())                    
                     next_state_idx = np.random.choice(possible_states, replace= True, p=transition_probs)
-                    prob *= transition_probs[next_state_idx]
-
+                    prob *= transition_probs[next_state_idx]        # probability of the transition occuring
+            
+            # update the state to reflect the transition
             current_state = state_space[next_state_idx]
             states_list.append(current_state)              
             i +=1 
@@ -131,13 +131,36 @@ class markovChain:
 
 # ---------------------------------------------------------------------
 
-    def stateIdxToName(self, idx):
-
+    def stateIdx2Name(self, idx):
         """
             Allows a users to quickly go between the state number and state name (for plotting mostly)
 
-            :param stateIdx: int the number of the state in the state space (ex: 0 = working)
-        """
+            :param idx: int the number of the state in the state space
 
-        state_space_dict = self.state_space
+            EX:
+                >>> mc.stateIdx2Name(0)
+                working
         
+        """
+        state_space = self.state_space
+        name = state_space.get(idx, "STATE WITH THAT IDX NOT FOUND.")
+        return name
+
+# ---------------------------------------------------------------------
+        
+    def stateName2Idx(self, name):    
+        """
+            Allows a users to quickly go between the state number and state name (for plotting mostly)
+
+            :param name: str the name of the state in the state space
+
+            EX:
+            >>> mc.stateIdx2Name('failed')
+            3
+        
+        """
+        for key, value in self.state_space.items():
+            if value == name:
+                idx = key
+                return idx
+        return "STATE WITH THAT NAME NOT FOUND"  # Return error if the name is not found

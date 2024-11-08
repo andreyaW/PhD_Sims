@@ -4,13 +4,15 @@ import numpy as np
 class sensor:
 
     ''' a simple model of a sensor object 
+        run with python -i sensor.py    
+
     
         EXAMPLE:
-        >>> sensor1 = sensor(0.98) 
-        >>> sensor1.state
+        >>> s1 = sensor(0.98) 
+        >>> s1.state
         'working'
-        >>> sensor1.update_state(2)
-        >>> sensor1.state
+        >>> s1.update_state(2)
+        >>> s1.state
         'failed'
 
     '''
@@ -35,12 +37,14 @@ class sensor:
         num_states= 2
         transition_mat = np.array([[self.accuracy, 1.0 -self.accuracy],
                                    [0.0  ,    1.0]])        # failed is absorbing state
-        self.markov_model = markovChain(num_states, transition_mat)
-        self.state = self.markov_model.current_state        
-
+        
+        mC = markovChain(num_states, transition_mat)
+        self.markov_model = mC
+        self.state = mC.current_state
+        self.state_no = mC.stateName2Idx(self.state)        
 
 # ---------------------------------------------------------------------
-    def update_state(self, num_days)-> None:
+    def updateState(self, num_days)-> None:
         """
         Predicts the true state of self after a given number of days
         
@@ -48,7 +52,9 @@ class sensor:
         """
 
         # update then update self attributes
-        self.markov_model.update_state(num_days)
-        self.state = self.markov_model.current_state
-    
+        mC = self.markov_model
+        mC.update_state(num_days)
+        self.state = mC.current_state
+        self.state_no = mC.stateName2Idx(mC.current_state)
+
 # ---------------------------------------------------------------------
