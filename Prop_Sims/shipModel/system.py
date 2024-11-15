@@ -36,17 +36,17 @@ class system:
         for parallel in list_of_parallels:
             parallel_states = []
             for idx in parallel:
-                comp = list_of_comps[idx]
+                comp = list_of_comps[idx-1]
                 parallel_states.append(comp.state)
                 group_state = parallel_logic(parallel_states, int(len(parallel_states)/2)) # assumes majority must be functional
             system_states.append(group_state)
 
-        # determine state of groups and series comps all together
-        list_of_parallels = set(list_of_parallels) # flatten the list of parallels
-        list_of_series = [i for i in range(len(list_of_comps)) if i not in list_of_parallels]
-        for series in list_of_series:            
-            system_states.append(system_states[idx])        
-        self.state = series_logic(system_states)
+        # # determine state of groups and series comps all together
+        # list_of_parallels = set(list_of_parallels) # flatten the list of parallels
+        # list_of_series = [i for i in range(len(list_of_comps)) if i not in list_of_parallels]
+        # for series in list_of_series:            
+        #     system_states.append(system_states[idx])        
+        # self.state = series_logic(system_states)
 
 # ---------------------------------------------------------------------
 

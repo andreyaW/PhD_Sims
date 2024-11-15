@@ -1,4 +1,5 @@
 import numpy as np
+from artistFunctions import drawGraphs as artist
 
 class markovChain:
     ''' 
@@ -160,3 +161,14 @@ class markovChain:
                 idx = key
                 return idx
         return "STATE WITH THAT NAME NOT FOUND"  # Return error if the name is not found
+
+# ---------------------------------------------------------------------
+    def draw(self):
+        """
+        Draws the Markov Chain Model
+
+        EX: 
+        >>> mc.draw()
+        """
+        
+        artist.drawMarkovChain(self)
