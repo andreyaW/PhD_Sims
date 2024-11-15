@@ -8,51 +8,50 @@ def drawMarkovChain(mC)->None:
 
         :param mC: MarkovChain object
     """
-    plt.figure(figsize=(10,7))
-    node_size = 200
+    plt.figure(figsize=(10,6))
+    node_size = 2000
+    font_size= 12
 
     # grab the states and transition rates from the Markov Chain object
     states = list(mC.state_space.keys())
-    rates = mC.transition_matrix
+    state_space = list(mC.state_space)
+    print(state_space)
+    num_states = len(states)
 
     # Create a directed graph
-    G = nx.MultiDiGraph()
-    labels={}
-    edge_labels={}
+    G = nx.DiGraph()
+    # G.add_nodes_from(mC.state_space) # no need to add nodes, they are added automatically when edges are added
     
-    for i, origin_state in enumerate(states):
-        for j, destination_state in enumerate(states):
-            rate = rates[i][j]
-            if rate > 0:
-                # G.add_nodes_from(states) # no need to add nodes
-                G.add_edge(origin_state, destination_state, weight=rate, label="{:.02f}".format(rate))
-                edge_labels[(origin_state, destination_state)] = label="{:.02f}".format(rate)
+    # add transition probabilities as edges
+    for i in range(num_states):
+        for j in range(num_states):
+            p_ij = mC.transition_matrix[i][j]
+            state_i = state_space[i]
+            state_j = state_space[j]
 
-    
-    
-    # # Add nodes and edges to the graph
-    # for i in range(num_states):
-    #     for j in range(num_states):
-    #         if mC.transition_matrix[i][j] > 0:
-    #             G.add_edge(states[i], states[j], weight = mC.transition_matrix[i][j])
+            G.add_edge(state_i, state_j, weight=p_ij, label="{:.02f}".format(p_ij), arrowstyle='|-|>', arrowsize=20)
 
     # Draw the graph with labels
     pos = nx.spring_layout(G)
-    # pos = {state:list(state) for state in states}
-    nx.draw_networkx_edges(G,pos,width=1.0,alpha=0.5)
-    nx.draw_networkx_labels(G, pos, font_weight=2)
-    nx.draw_networkx_edge_labels(G, pos, edge_labels)
-    plt.axis('off');
-    plt.savefig("../markovChainImage", bbox_inches='tight')
+    edge_labels = nx.get_edge_attributes(G, 'label')
+    nx.draw(G, pos, with_labels=True, node_size=node_size, node_color='skyblue', edge_color = 'gray', 
+            font_size=font_size, font_weight='bold', arrowsize=20, arrowstyle='-|>')
+    plt.axis('off')
+    
+    checkGraphAttributes(G)
+    
+    plt.savefig("./markovChainImage_"+ mC.name.upper(), bbox_inches='tight')
     plt.show()
 
-    # pos = nx.spring_layout(G)
-    # nx.draw(G, pos, with_labels = True, node_size = 500, node_color = 'blue', 
-    #                 font_size = 10, font_color = 'k', font_weight = 'bold', 
-    #                 width = 1, edge_color = 'b')
-    # labels = nx.get_edge_attributes(G, 'weight')
-    # labels = {k: round(v, 2) for k, v in labels.items()} # round the weights to 2 decimal places    
-    # nx.draw_networkx_edge_labels(G, pos, edge_labels = labels)
-    # title = mC.name + " Markov Chain Model "
-    # plt.title(title)
-    # plt.show()
+# ---------------------------------------------------------------------
+
+def checkGraphAttributes(G)->None:
+    """
+    A helper functin to check the attributes of the graph object
+
+    """
+    print("The graph nodes are : " , list(G.nodes))
+    # print("The graph edges are : " ,list(G.edges))
+    # print("The graph adjectives are : " ,list(G.adj))
+    # print("The graph degrees are : " ,list(G.degree))
+    

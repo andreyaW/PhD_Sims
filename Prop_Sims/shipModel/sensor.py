@@ -14,6 +14,8 @@ class sensor:
         >>> s1.update_state(2)
         >>> s1.state
         'failed'
+        >>> s1.state_num
+        1
 
     '''
 
@@ -42,7 +44,7 @@ class sensor:
         mC = markovChain(num_states, transition_mat)
         self.markov_model = mC
         self.state = mC.current_state
-        self.state_no = mC.stateName2Idx(self.state)    
+        self.state_num = mC.stateName2Idx(self.state)    
         mC.name = self.name    
 
 # ---------------------------------------------------------------------
@@ -57,6 +59,6 @@ class sensor:
         mC = self.markov_model
         mC.update_state(num_days)
         self.state = mC.current_state
-        self.state_no = mC.stateName2Idx(mC.current_state)
+        self.state_num = mC.stateName2Idx(mC.current_state)
 
 # ---------------------------------------------------------------------

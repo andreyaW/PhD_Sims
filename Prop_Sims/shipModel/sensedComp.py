@@ -40,22 +40,22 @@ class sensedComp:
     # ---------------------------------------------------------------------
     def defineMarkovModel(self)->None:
         """
-        Creates a model for self using a markov chain object. the state space for a sensed component is the same state space as the component, plus an additional "undetected" state.
+        Creates a model for self using a the components original markov chain object. the state space for a sensed component is the same state space as the component, plus an additional "undetected" state.
         """
 
         # add a state indicating only some sensors working
-        self.state_space = deepcopy(self.comp.markov_model.state_space)
-        val1 = "sensors failing" 
-        key1 = len(self.state_space)
-        self.state_space.update( {key1: val1})
+        self.markov_model = deepcopy(self.comp.markov_model)
 
-        # add a state indicating no sensors working    
-        val2 = "all sensors failed"        
-        key2 = key1 + 1
-        self.state_space.update( {key1: val1})
+        new_states = ["sensors failing" , "sensors_failed"]
+        new_states_idx = [len(self.markov_model.state_space) , len(self.markov_model.state_space)+1]
+        
+        for i in range(len(new_states)):
+            self.markov_model.state_space.update({new_states_idx[i]: new_states[i]})
     
         # choose initial state based on component
         self.state= self.comp.state
+        self.state_num = self.comp.state_num
+        self.state_space = self.markov_model.state_space
 
 # ---------------------------------------------------------------------
     def updateState(self, num_days):
