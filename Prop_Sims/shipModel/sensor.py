@@ -24,6 +24,7 @@ class sensor:
         :params accuracy: float the probability of the sensor detecting state correctly
                                 the default is a good sensor (high accuracy)
         """
+        self.name = "sensor"
         self.accuracy = accuracy   
         self.defineMarkovModel()
         
@@ -41,7 +42,8 @@ class sensor:
         mC = markovChain(num_states, transition_mat)
         self.markov_model = mC
         self.state = mC.current_state
-        self.state_no = mC.stateName2Idx(self.state)        
+        self.state_no = mC.stateName2Idx(self.state)    
+        mC.name = self.name    
 
 # ---------------------------------------------------------------------
     def updateState(self, num_days)-> None:
