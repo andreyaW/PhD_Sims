@@ -32,7 +32,7 @@ class markovChain:
         # self.num_states = num_states
         self.verifyTransitionMatrix(transition_prob) 
         self.defineStateSpace(num_states)
-
+        
 # ------------------------------------------------------------------------------------
 
     def verifyTransitionMatrix(self, transition_matrix) -> None:
@@ -44,16 +44,18 @@ class markovChain:
         :param transition_matrix: ndarray matrix of transition probabilities between states
         
         """
-        # check that the matrix is square
+        # CHECK0: matrix must be square
         if transition_matrix.shape[0] != transition_matrix.shape[1]:
-            raise(ValueError("The transition matrix should be square."))
+            raise ValueError("The transition matrix must be square.")
+        
+        # CHECK1: the sum of each row should be 1
+        if not np.allclose(transition_matrix.sum(axis=1), 1):
+            raise ValueError("The sum of each row should be 1.")
 
-        # check that each row sums to 1
-        for i in range(transition_matrix.shape[1]):
-            row = transition_matrix[i, :]
-            if np.sum(row) != 1.0:
-                raise (ValueError("The transition matrix must sum to 1 across each row."))
-
+        # CHECK2: all values should be between 0 and 1
+        if not np.all((transition_matrix >= 0) & (transition_matrix <= 1)):
+            raise ValueError("All values in the transition matrix should be between 0 and 1.")
+        
         self.transition_matrix = transition_matrix
 
     # ------------------------------------------------------------------------------------
@@ -82,27 +84,27 @@ class markovChain:
 
         # the initial state is working (unless specified otherwise)   
         initial_state_name = self.stateIdx2Name(initial_state_idx)
-        self.current_state = initial_state_name
-        self.current_state_prob = 1                 # 100% chance of starting at designated inital state
+        self.state = initial_state_name
+        self.state_prob = 1                 # 100% chance of starting at designated inital state
 
 
 # ------------------------------------------------------------------------------------  
     
-    def update_state(self, num_days) -> None:
+    def updateState(self, num_steps) -> None:
         """
         Forecasts the future state of the Markov Model
         
         :param num_days: int number of steps to update the state over
         
         """
-        current_state = self.current_state        
+        current_state = self.state        
         state_space = self.state_space
         states_list = [current_state]
         
         # iterate over the desired number of days 
-        prob = self.current_state_prob
+        probs = [self.current_state_prob , 0, 0]
         i = 0
-        while i != num_days:
+        while i != num_steps:
 
             for key, value in state_space.items(): # keys is state label #, values is state name
                 
@@ -111,16 +113,21 @@ class markovChain:
                     transition_probs = self.transition_matrix[key]
                     possible_states = list(state_space.keys())                    
                     next_state_idx = np.random.choice(possible_states, replace= True, p=transition_probs)
-                    prob *= transition_probs[next_state_idx]        # probability of the transition occuring
+                    probs *= transition_probs                               # n step update (assumes no change in transition probabilities over time)
+                    current_state_prob = max(probs) * probs[next_state_idx] # probability of the ground truth sequence of states
             
-            # update the state to reflect the transition
-            current_state = state_space[next_state_idx]
-            states_list.append(current_state)              
-            i +=1 
+                    print(probs)
+                    print(current_state_prob)
+            
+                # update the state to reflect the transition
+                current_state = state_space[next_state_idx]
+                states_list.append(current_state)              
+                i +=1 
 
         # save important attributes to self
-        self.current_state = current_state
-        self.current_state_prob = prob
+        self.state = current_state
+        self.state_prob = max(probs) # probability of the ground truth sequence of states
+        self.all_state_probs = probs      # probability of being in any state at any time
         
         # print("Possible states: " + str(states_list))
         # print("End state after " + str(num_steps) + " days: " + str(current_state))

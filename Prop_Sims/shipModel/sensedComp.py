@@ -38,24 +38,74 @@ class sensedComp:
         self.defineMarkovModel()
 
     # ---------------------------------------------------------------------
+    
     def defineMarkovModel(self)->None:
         """
-        Creates a model for self using a the components original markov chain object. the state space for a sensed component is the same state space as the component, plus an additional "undetected" state.
-        """
-
-        # add a state indicating only some sensors working
-        self.markov_model = deepcopy(self.comp.markov_model)
-
-        new_states = ["sensors failing" , "sensors_failed"]
-        new_states_idx = [len(self.markov_model.state_space) , len(self.markov_model.state_space)+1]
+        Creates a new markov chain model for the sensedComp using the components 
+        markov chain object. the state space for a sensed component is the same 
+        state space as the components, plus an additional "undetected" state.
         
-        for i in range(len(new_states)):
-            self.markov_model.state_space.update({new_states_idx[i]: new_states[i]})
+        """
+        # copy original states from comp
+        states = deepcopy(self.comp.markov_model.state_space)
+
+        # add a state indicating sensors not working
+        new_state = ["sensors_failed"]
+        new_state_idx = [len(self.comp.markov_model.state_space)]
+        # markov_model.state_space.update({new_state_idx: new_state})
     
-        # choose initial state based on component
-        self.state= self.comp.state
-        self.state_num = self.comp.state_num
-        self.state_space = self.markov_model.state_space
+        # update the transition matrix to account for sensors being failed
+        list_of_sensor_states = []
+        prob_failed_sensors = 1   
+        for sensor in self.sensors:
+            list_of_sensor_states.append(sensor.state_num)            
+            prob_failed_sensors= prob_failed_sensors * (1-sum(sensor.markov_model.transition_matrix[-1,:]))
+
+        final_sensor_state = max(set(list_of_sensor_states), key=list_of_sensor_states.count)
+        print(final_sensor_state)
+        print(list_of_sensor_states)
+        print(prob_failed_sensors)
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # # ---------------------------------------------------------------------
+    # def defineMarkovModel(self)->None:
+    #     """
+    #     Creates a model for self using a the components original markov chain object. the state space for a sensed component is the same state space as the component, plus an additional "undetected" state.
+    #     """
+
+    #     # add a state indicating only some sensors working
+    #     self.markov_model = deepcopy(self.comp.markov_model)
+
+    #     new_states = ["sensors failing" , "sensors_failed"]
+    #     new_states_idx = [len(self.markov_model.state_space) , len(self.markov_model.state_space)+1]
+        
+    #     for i in range(len(new_states)):
+    #         self.markov_model.state_space.update({new_states_idx[i]: new_states[i]})
+    
+    #     # choose initial state based on component
+    #     self.state= self.comp.state
+    #     self.state_num = self.comp.state_num
+    #     self.state_space = self.markov_model.state_space
 
 # ---------------------------------------------------------------------
     def updateState(self, num_days):
