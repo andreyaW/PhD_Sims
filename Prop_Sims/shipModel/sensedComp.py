@@ -37,8 +37,8 @@ class sensedComp:
         self.sensors = sensors_list     # default is two "good" sensors
         self.defineMarkovModel()
 
+
     # ---------------------------------------------------------------------
-    
     def defineMarkovModel(self)->None:
         """
         Creates a new markov chain model for the sensedComp using the components 
@@ -50,13 +50,9 @@ class sensedComp:
         self.createNewStates()
         self.createTransitionMatrix()
 
-        # # use states and transition matrix to define the markov model
-        # self.markov_model = markovChain(len(self.state_space), self.transition_matrix)
-        # self.markov_model.state_space = self.state_space  
-
-        # # determine the probability that majority of the sensors are working
-        # sensor_state, sensor_state_prob = self.checkSensors()
-        # comp_state, comp_state_prob = self.comp.state, self.comp.state_prob
+        # use states and transition matrix to define the markov model
+        self.markov_model = markovChain(len(self.state_space), self.transition_matrix)
+        self.markov_model.state_space = self.state_space  
 
     # ---------------------------------------------------------------------
     def createNewStates(self):
@@ -87,10 +83,17 @@ class sensedComp:
         self.checkSensors() # function to aggregate sensor states
 
         # iterate over all possible cases of sensor and component states
-        i,j = self.transition_matrix.shape
-        for i in range(i):
-            for j in range(j):
-                self.transition_matrix[i,j] = 6
+        # i,j = self.transition_matrix.shape
+        # for i in range(i):
+        #     for j in range(j):
+
+        # temp transition matrix 6x6
+        transition_matrix = np.array([[0.98, 0.01, 0.01, 0.0, 0.0, 0.0],
+                                      [0.98, 0.01, 0.01, 0.0, 0.0, 0.0],
+                                      [0.98, 0.01, 0.01, 0.0, 0.0, 0.0],
+                                      [0.98, 0.01, 0.01, 0.0, 0.0, 0.0],
+                                      [0.98, 0.01, 0.01, 0.0, 0.0, 0.0],
+                                      [0.98, 0.01, 0.01, 0.0, 0.0, 0.0]])
 
 
     # ---------------------------------------------------------------------
@@ -121,7 +124,11 @@ class sensedComp:
 
     # ---------------------------------------------------------------------
     def setInitialState(self):
-        pass
+        # determine the probability that majority of the sensors are working
+        sensor_state, sensor_state_prob = self.checkSensors()
+        comp_state, comp_state_prob = self.comp.state, self.comp.state_prob
+
+
         # # choose initial state based on component
         # if sensor_state == 0:
         #     self.state = comp_state

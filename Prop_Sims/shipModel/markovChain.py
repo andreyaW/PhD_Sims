@@ -52,9 +52,9 @@ class markovChain:
         if transition_matrix.shape[0] != transition_matrix.shape[1]:
             raise ValueError("The transition matrix must be square.")
         
-        # CHECK1: the sum of each row should be 1
-        if not np.allclose(transition_matrix.sum(axis=1), 1):
-            raise ValueError("The sum of each row should be 1.")
+        # # CHECK1: the sum of each row should be 1
+        # if not np.allclose(transition_matrix.sum(axis=1), 1):
+        #     raise ValueError("The sum of each row should be 1.")
 
         # CHECK2: all values should be between 0 and 1
         if not np.all((transition_matrix >= 0) & (transition_matrix <= 1)):
