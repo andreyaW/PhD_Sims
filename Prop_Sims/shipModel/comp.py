@@ -45,10 +45,16 @@ class comp:
         
         # save important attributes to self 
         mC = markovChain(num_states, transition_mat)
+        
+        # update the name of the markov model to sensor
+        mC.name = self.name                     
+
+        # store necessary parameters of the markov model to self
         self.markov_model = mC
-        self.state = mC.current_state
-        self.state_num = mC.stateName2Idx(self.state)        
-        mC.name = self.name
+        self.state = mC.state
+        self.state_prob = mC.state_prob
+        self.state_name = mC.stateIdx2Name(mC.state)   
+        
 # ---------------------------------------------------------------------
     def updateState(self, num_days)-> None:
         """
@@ -57,10 +63,14 @@ class comp:
         :param num_days: int number of days to predict ahead from current state
         """
 
-        # update then update self attributes
+        # update the markov model
         mC = self.markov_model
-        mC.update_state(num_days)
-        self.state = mC.current_state
-        self.state_num = mC.stateName2Idx(mC.current_state)
+        mC.updateState(num_days)
+
+        # update the parameters of self to match the markov model
+        self.state = mC.state
+        self.state_prob = mC.state_prob
+        self.state_name = mC.stateIdx2Name(mC.state)
+
         
 # ---------------------------------------------------------------------

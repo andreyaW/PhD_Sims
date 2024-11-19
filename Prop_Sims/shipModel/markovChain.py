@@ -1,5 +1,8 @@
-import numpy as np
 from artistFunctions import drawGraphs as artist
+
+import numpy as np
+import matplotlib.pyplot as plt
+
 
 class markovChain:
     ''' 
@@ -29,9 +32,10 @@ class markovChain:
         :param transition_prob: ndarray matrix of transition probabilities between states
 
         """
-        # self.num_states = num_states
+        self.name = "Markov Chain Model"
         self.verifyTransitionMatrix(transition_prob) 
         self.defineStateSpace(num_states)
+        self.history = []                   # store the history of the model
         
 # ------------------------------------------------------------------------------------
 
@@ -62,7 +66,7 @@ class markovChain:
 
     def defineStateSpace(self, N, initial_state_idx: int = 0) -> None:
         """
-        Initialize the state space as a dictionary and pick a random initial state
+        Initialize the state space as a dictionary and picks an initial state
         
         :param N: int number of states in the state space
         :param initial_state_idx: the number of the intial state as defined in the state space dictionary 
@@ -84,12 +88,37 @@ class markovChain:
 
         # the initial state is working (unless specified otherwise)   
         initial_state_name = self.stateIdx2Name(initial_state_idx)
-        self.state = initial_state_name
-        self.state_prob = 1                 # 100% chance of starting at designated inital state
+        self.state = initial_state_idx
+        self.state_name = initial_state_name
 
+        # create a list for probabilities of each state
+        state_prob = np.zeros(N)
+        state_prob[initial_state_idx] = 1   # 100% chance of starting at designated inital state
+        self.state_prob = state_prob
 
 # ------------------------------------------------------------------------------------  
-    
+    def nextState(self, current_state):
+        """
+        A function to simulate one step in a Markov chain
+        :param current_state: int the assumed current state of the Markov Chain
+        """
+        transition_matrix = self.transition_matrix
+        current_state_prob = self.state_prob[current_state]
+
+        # randomly select the next state based on the transition matrix
+        nextStateidx = np.random.choice(range(len(transition_matrix)),
+                                p=transition_matrix[current_state] )
+        nextStateidx = int(nextStateidx)
+
+        # update the state probabilities
+        state_probs = np.zeros(len(transition_matrix))
+        state_probs[nextStateidx] = current_state_prob * transition_matrix[current_state][nextStateidx]
+        self.state_prob = state_probs
+        # print(self.state_prob)
+
+        return nextStateidx
+
+
     def updateState(self, num_steps) -> None:
         """
         Forecasts the future state of the Markov Model
@@ -97,44 +126,25 @@ class markovChain:
         :param num_days: int number of steps to update the state over
         
         """
-        current_state = self.state        
-        state_space = self.state_space
-        states_list = [current_state]
+        current_state = self.state
         
         # iterate over the desired number of days 
-        probs = [self.current_state_prob , 0, 0]
         i = 0
+        history = []
         while i != num_steps:
 
-            for key, value in state_space.items(): # keys is state label #, values is state name
-                
-                # determine the current state and the next state 
-                if current_state == value:
-                    transition_probs = self.transition_matrix[key]
-                    possible_states = list(state_space.keys())                    
-                    next_state_idx = np.random.choice(possible_states, replace= True, p=transition_probs)
-                    probs *= transition_probs                               # n step update (assumes no change in transition probabilities over time)
-                    current_state_prob = max(probs) * probs[next_state_idx] # probability of the ground truth sequence of states
-            
-                    print(probs)
-                    print(current_state_prob)
-            
-                # update the state to reflect the transition
-                current_state = state_space[next_state_idx]
-                states_list.append(current_state)              
-                i +=1 
+            i+=1
+            history.append(current_state)                                 # store the current state
+            next_state = self.nextState(current_state)   # transition to the next state
+            current_state = next_state
 
-        # save important attributes to self
+        # save important attributes to self                        
+        self.history = self.history + history
         self.state = current_state
-        self.state_prob = max(probs) # probability of the ground truth sequence of states
-        self.all_state_probs = probs      # probability of being in any state at any time
-        
-        # print("Possible states: " + str(states_list))
-        # print("End state after " + str(num_steps) + " days: " + str(current_state))
-        # print("Probability of the possible sequence of states: " + str(prob))
+        self.state_name = self.stateIdx2Name(current_state)
+
 
 # ---------------------------------------------------------------------
-
     def stateIdx2Name(self, idx):
         """
             Allows a users to quickly go between the state number and state name (for plotting mostly)
@@ -179,3 +189,4 @@ class markovChain:
         """
         
         artist.drawMarkovChain(self)
+        artist.plotMarkovChainHistory(self)
