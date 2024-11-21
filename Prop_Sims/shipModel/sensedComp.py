@@ -64,7 +64,6 @@ class sensedComp:
         state_space = {}
         comp_state_names = list(self.comp.markov_model.state_space.keys())
         sensor_state_names = list(self.sensors[0].markov_model.state_space.keys())
-        
 
         for i in range(len(sensor_state_names)):
             for j in range(len(comp_state_names)):
@@ -77,23 +76,17 @@ class sensedComp:
     def createTransitionMatrix(self):
         
         # create new transition matrix
-        self.transition_matrix = np.zeros((len(self.state_space), len(self.state_space)))
+        transition_matrix = np.zeros((len(self.state_space), len(self.state_space)))
 
         # iterate over all possible cases of sensor and component states
         self.checkSensors() # function to aggregate sensor states
-
-        # iterate over all possible cases of sensor and component states
-        # i,j = self.transition_matrix.shape
-        # for i in range(i):
-        #     for j in range(j):
+        
+        # print("sensor is in state; " + self.sensor_state + "with probability " + self.sensor_state_prob)
 
         # temp transition matrix 6x6
-        transition_matrix = np.array([[0.98, 0.01, 0.01, 0.0, 0.0, 0.0],
-                                      [0.98, 0.01, 0.01, 0.0, 0.0, 0.0],
-                                      [0.98, 0.01, 0.01, 0.0, 0.0, 0.0],
-                                      [0.98, 0.01, 0.01, 0.0, 0.0, 0.0],
-                                      [0.98, 0.01, 0.01, 0.0, 0.0, 0.0],
-                                      [0.98, 0.01, 0.01, 0.0, 0.0, 0.0]])
+        # transition_matrix[0][0] = self.comp_state_prob * self.sensor_state_prob
+    
+
 
 
     # ---------------------------------------------------------------------
@@ -127,7 +120,6 @@ class sensedComp:
         # determine the probability that majority of the sensors are working
         sensor_state, sensor_state_prob = self.checkSensors()
         comp_state, comp_state_prob = self.comp.state, self.comp.state_prob
-
 
         # # choose initial state based on component
         # if sensor_state == 0:

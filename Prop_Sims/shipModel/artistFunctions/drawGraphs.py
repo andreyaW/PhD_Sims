@@ -2,6 +2,38 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
+
+def drawMarkovChain(mC)->None:
+    # Create a figure and axes
+    fig, ax = plt.subplots()
+
+    states= mC.state_space.keys()
+    transition_matrix = mC.transition_matrix
+
+    # Draw the states as nodes
+    for i, state in enumerate(states):
+        ax.add_patch(plt.Circle((i, 0), radius=0.25, color="white", ec="black"))
+        ax.text(i, 0, state, ha="center", va="center", fontsize=12)
+
+    # Draw the transitions as arrows
+    for i, row in enumerate(transition_matrix):
+        for j, prob in enumerate(row):
+            if prob > 0:
+                ax.annotate("", xy=(j, 0), xytext=(i, 0),
+                            arrowprops=dict(arrowstyle="-|>", color="black", lw=prob*3))
+                ax.text((i+j)/2, 0.1, f"{prob:.2f}", ha="center", va="center", fontsize=10)
+
+    # Set the axis limits and labels
+    ax.set_xlim(-0.5, len(states)-0.5)
+    ax.set_ylim(-0.5, 0.5)
+    ax.set_yticks([])
+    ax.axis('off')
+
+    # Show the plot
+    plt.show()
+
+
+
 def drawMarkovChain(mC)->None:
     """"
         Draw the Markov Chain as a directed graph

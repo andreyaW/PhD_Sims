@@ -186,7 +186,7 @@ class markovChain:
 
         EX: 
         >>> mc.draw()
+
         """
-        
         artist.drawMarkovChain(self)
         artist.plotMarkovChainHistory(self)
