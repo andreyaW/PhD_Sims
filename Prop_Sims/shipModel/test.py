@@ -1,40 +1,54 @@
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import numpy as np
 
-# Define the states and transition probabilities
-states = ["Sunny", "Cloudy", "Rainy"]
-transition_matrix = np.array([[0.6, 0.3, 0.1],
-                               [0.2, 0.5, 0.3],
-                               [0.1, 0.4, 0.5]])
+def draw_markov_chain(num_states):
+    fig, ax = plt.subplots(figsize=(num_states * 1.5, 3))
+    
+    # Coordinates for states
+    x_coords = np.linspace(1, num_states, num_states)
+    y_coord = 1
 
-# Create a figure and axes
-fig, ax = plt.subplots()
+    # Draw states as circles
+    state_radius = 0.2
+    for i, x in enumerate(x_coords):
+        # Circle for each state
+        circle = plt.Circle((x, y_coord), state_radius, color='skyblue', ec='black', zorder=2)
+        ax.add_patch(circle)
+        # State label
+        ax.text(x, y_coord, f"S{i+1}", ha='center', va='center', fontsize=12, zorder=3)
 
-# Draw the states as nodes
-for i, state in enumerate(states):
-    ax.add_patch(plt.Circle((i, 0), radius=0.1, color="white", ec="black"))
-    ax.text(i, 0, state, ha="center", va="center", fontsize=12)
+        # Recurrent arrow (loop)
+        arrow = patches.FancyArrowPatch(
+            (x + state_radius / 2, y_coord + state_radius / 2),
+            (x - state_radius / 2, y_coord + state_radius / 2),
+            connectionstyle="arc3,rad=1",
+            color='black',
+            arrowstyle="->",
+            mutation_scale=10,
+            lw=1,
+        )
+        ax.add_patch(arrow)
 
-# Draw the transitions as arrows
-for i, row in enumerate(transition_matrix):
-    for j, prob in enumerate(row):
-        if prob > 0:
-            ax.annotate("", xy=(j, 0), xytext=(i, 0),
-                        arrowprops=dict(arrowstyle="-|>", color="black", lw=prob*2))
-            ax.text((i+j)/2, 0.1, f"{prob:.2f}", ha="center", va="center", fontsize=10)
+    # Draw arrows between states
+    for i in range(num_states - 1):
+        arrow = patches.FancyArrowPatch(
+            (x_coords[i] + state_radius, y_coord),
+            (x_coords[i + 1] - state_radius, y_coord),
+            color='black',
+            arrowstyle="->",
+            mutation_scale=10,
+            lw=1,
+        )
+        ax.add_patch(arrow)
 
-# Set the axis limits and labels
-ax.set_xlim(-0.5, len(states)-0.5)
-ax.set_ylim(-0.5, 0.5)
-ax.set_yticks([])
+    # Setting limits and aspect
+    ax.set_xlim(0, num_states + 1)
+    ax.set_ylim(0, 2)
+    ax.set_aspect('equal', adjustable='datalim')
+    ax.axis('off')
 
-# Show the plot
-plt.show()
+    plt.show()
 
-
-
-
-# # Print results
-# print(f"{'Step':<5} {'Component State':<10} {'Sensor State':<10}")
-# for step, (component, sensor) in enumerate(results, 1):
-#     print(f"{step:<5} {component:<15} {sensor:<15}")
+# Example: Draw a Markov chain with 5 states
+draw_markov_chain(5)
