@@ -25,11 +25,19 @@ def add_nodes(G, pos, state_names):
     for i, state in enumerate(state_names):
         G.add_node(state, label = wrap_label(state))  # Add nodes with wrapped labels
     
-        # Position the nodes
-        if type(pos[0]) == tuple :
+        # Position the nodes (failure node below all others)
+        if state == state_names[-1]:
+            if type(pos[0]) == tuple :
+                new_pos = (pos[i][0]*fixed_distance, pos[i][1] -10)  # for two level horizontal graph (sensed comp)
+                updated_poses.update({state:new_pos})  
+            elif type(pos[0]) == int:
+                new_pose = (pos[i]*fixed_distance, -10) # for horizontal graph (comp or sensor only)
+                updated_poses.update({state:new_pose}) 
+        
+        elif type(pos[0]) == tuple :
             new_pos = (pos[i][0]*fixed_distance, pos[i][1])  # for two level horizontal graph (sensed comp)
             updated_poses.update({state:new_pos})  
-        if type(pos[0]) == int:
+        elif type(pos[0]) == int:
             new_pose = (pos[i]*fixed_distance, 0) # for horizontal graph (comp or sensor only)
             updated_poses.update({state:new_pose}) 
     
@@ -44,88 +52,61 @@ def add_edges(G, states, transition_matrix):
     """    
     # Add edges to the graph
     for i,state_i in enumerate(states):
-        recurrent_prob = transition_matrix[i][i]
-        if recurrent_prob > 0:
-            G.add_edge(state_i, state_i, weight=recurrent_prob)  # Recurrent transitions (self-loops)
 
         for j, state_j in enumerate(states):
-        
-            forward_prob = transition_matrix[i][j]
-            backward_prob = transition_matrix[j][i]
-            
-            if forward_prob > 0:
-                G.add_edge(state_i, state_j, weight=forward_prob)  # Forward transition
 
-            if backward_prob > 0:
-                G.add_edge(state_j, state_i, weight=backward_prob) # Backward transition
-    return G
-    # return edge_labels
-
+            transition_prob = transition_matrix[i][j]
+            if transition_prob > 0:
+                G.add_edge(state_i, state_j, weight=transition_prob, label=round(transition_prob, 2), connectionstyle='arc3,rad=-5') 
+               
 # ----------------------------------------------------------------------------------------------
 def drawMarkovChain(mC)->None:
     # grab necessary values from the Markov Chain object
     state_numbers = list(mC.state_space.values())
     state_names = list(mC.state_space.keys())
-    graph_params ={ 'node_size': 4250, 
-                    'node_color': 'none', 
-                    'font_size' : 10, 'font_weight': 'bold', 
-                    'arrowsize': 10, 'arrowstyle': '->',
+    graph_params ={ 'node_size': 1750, 
+                    'node_color': 'white', 
+                    'node_font_size' : 7, 'probs_font_size': 15, 'font_weight': 'bold', 
+                    'arrowsize': 8, 'arrowstyle': '->',
                     'edge_color':'black'}   
 
     # Create and draw a directed graph
     plt.figure(figsize=(10, 3))
-    G = nx.DiGraph()
+
+    G = nx.MultiDiGraph()
     pos = add_nodes(G, state_numbers, state_names)
     add_edges(G, state_names, mC.transition_matrix)    
     nx.draw(G, pos, with_labels=False, node_size=graph_params['node_size'], node_color=graph_params['node_color'],
             edgecolors='grey', edge_color=graph_params['edge_color'],
-            font_size=graph_params['font_size'], font_weight=graph_params['font_weight'], 
+            font_size=graph_params['node_font_size'], font_weight=graph_params['font_weight'], 
             arrowsize=graph_params['arrowsize'], arrowstyle=graph_params['arrowstyle'])
 
     # Use custom labels for nodes (use the 'label' attribute)
-    node_labels = nx.get_node_attributes(G, 'label')  # Get wrapped labels from node attributes
-    nx.draw_networkx_labels(G, pos, labels=node_labels, font_size=graph_params['font_size'], font_weight=graph_params['font_weight'])
+    node_labels = nx.get_node_attributes(G, 'label') 
+    nx.draw_networkx_labels(G, pos, labels=node_labels, font_size=graph_params['node_font_size'], font_weight=graph_params['font_weight'])
 
+    # Use custom labels for edges (use the 'weight' attribute)
+    edge_labels= nx.get_edge_attributes(G, 'weight')
 
-    #---- Not working as expected ----
-    # Create edge labels (including self-loop edges)
-    edge_labels = {}
+    # update each pos to move up
     edge_label_pos = {}
-    for i, j in G.edges:
-        weight = round(G[i][j]['weight'], 2)
-        edge_labels[(i, j)] = str(weight)  # Assign weights as edge labels
-
-        # Custom positioning for self-loops
-        if i == j:  # Self-loop
-            x, y = pos[i]  # Position of the node
-            edge_label_pos[(i, j)] = (x, y + 0.2)  # Move label slightly above the node
-        else:
-            # For other edges, position the label at the midpoint (default behavior)
-            edge_label_pos[(i, j)] = ((pos[i][0] + pos[j][0]) / 2, (pos[i][1] + pos[j][1]) / 2)
-
-    # check that the edge labels and egde positions have the same keys
-    print(edge_labels.keys() == edge_label_pos.keys())
-
-    # Debugging Aid
-    print("Graph Edges:", list(G.edges))
-    print("Edge Labels:", edge_labels.keys())
-    print("Edge Label Positions:", edge_label_pos.keys())       
-    
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=graph_params['font_size'], font_weight=graph_params['font_weight'], bbox=dict(boxstyle="round,pad=0.3", edgecolor='black', facecolor='lightgrey'), alpha=0.8)
-
-    # nx.draw_networkx_edge_labels(G, edge_label_pos, edge_labels= edge_labels, font_size=graph_params['font_size'], font_weight=graph_params['font_weight'], bbox=dict(boxstyle="round,pad=0.3", edgecolor='black', facecolor='lightgrey'), alpha=0.8)
+    for position in pos:
+        edge_label_pos[position] = (pos[position][0], pos[position][1] + 1) 
+    nx.draw_networkx_edge_labels(G, edge_label_pos, edge_labels=edge_labels, font_size=graph_params['probs_font_size']-5, font_weight=graph_params['font_weight'], bbox=dict(boxstyle="round,pad=0.3", edgecolor='black', facecolor='lightgrey'), alpha=0.8)
 
     # Update the axis limits
     x0, x1 = plt.xlim()  # Get current axis limits
-    plt.xlim(x0 - 0.5, x1 + 0.5)
+    # plt.axis('off')
+    plt.title("Markov Chain: " + mC.name, fontsize=10)
     y0, y1 = plt.ylim()
-    plt.ylim(y0 - 0.5, y1 + 0.5)
+    plt.ylim(y0-2, y1 +2)
+    print(f"y0: {plt.ylim()[0]}, y1: {plt.ylim()[1]}")
 
-    # Finalize the plot
-    plt.title("Markov Chain: " + mC.name)
-    plt.axis('off')
+    plt.axis('on')
     plt.show()
-# ----------------------------------------------------------------------------------------------
+    nx.drawing.nx_pydot.write_dot(G, 'markov.dot')
+
+#----------------------------------------------------------------------------------------------
 
 def plotMarkovChainHistory(mC)->None:
     """

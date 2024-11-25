@@ -79,7 +79,27 @@ class sensedComp:
         transition_matrix = np.zeros((len(self.state_space), len(self.state_space)))
 
         # iterate over all possible cases of sensor and component states
-        self.checkSensors() # function to aggregate sensor states
+        self.checkSensors() # function to aggregate sensor states to sensor state and state probability
+        sensor_state, sensor_state_prob = self.sensor_state, self.sensor_state_prob
+        print('the sensor state is: ', sensor_state)
+        print('the sensor state probability is: ', sensor_state_prob)
+
+        comp_state, comp_state_prob = self.comp.state, self.comp.state_prob
+        print('the component state is: ', self.comp.state)
+        print('the component state probability is: ', self.comp.state_prob)
+        
+
+        # transition_matrix[0,0] = 
+
+        # sensors working and comp working
+        # sensors not workign and comp working
+        
+        # sensors working and comp not working
+        # sensors not working and comp not working
+
+
+
+        # fill in the transitions based on the probabilities of specific conditions 
         
         # print("sensor is in state; " + self.sensor_state + "with probability " + self.sensor_state_prob)
 

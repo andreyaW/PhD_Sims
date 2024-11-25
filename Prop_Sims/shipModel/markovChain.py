@@ -91,10 +91,17 @@ class markovChain:
         self.state = initial_state_idx
         self.state_name = initial_state_name
 
-        # create a list for probabilities of each state
+        # create an array for probabilities of each state
         state_prob = np.zeros(N)
         state_prob[initial_state_idx] = 1   # 100% chance of starting at designated inital state
         self.state_prob = state_prob
+
+
+
+
+
+
+
 
 # ------------------------------------------------------------------------------------  
     def nextState(self, current_state):
@@ -102,19 +109,16 @@ class markovChain:
         A function to simulate one step in a Markov chain
         :param current_state: int the assumed current state of the Markov Chain
         """
-        transition_matrix = self.transition_matrix
-        current_state_prob = self.state_prob[current_state]
+        P = self.transition_matrix
+        current_prob = self.state_prob
 
-        # randomly select the next state based on the transition matrix
-        nextStateidx = np.random.choice(range(len(transition_matrix)),
-                                p=transition_matrix[current_state] )
-        nextStateidx = int(nextStateidx)
+        # randomly select the next state
+        nextStateidx = int(np.random.choice(range(len(P)),
+                                p=P[current_state] ))
 
-        # update the state probabilities
-        state_probs = np.zeros(len(transition_matrix))
-        state_probs[nextStateidx] = current_state_prob * transition_matrix[current_state][nextStateidx]
-        self.state_prob = state_probs
-        # print(self.state_prob)
+        # update the state probabilities based on the transition matrix
+        next_prob = np.dot(current_prob, P)  # Update probabilities
+        self.state_prob = next_prob
 
         return nextStateidx
 
