@@ -152,46 +152,56 @@ def drawStateSpace(mC):
     plt.show()
 
 # ----------------------------------------------------------------------------------------------
-def drawSensingHistory(sensed_comp):
-
-    component_state_sequence = sensed_comp.comp.markov_model.history
-    print(component_state_sequence)
-    sensor_observation_sequence = [[sensor.markov_model.history] for sensor in sensed_comp.sensors]
-    print(sensor_observation_sequence)
+def drawSensingHistory(sensed_comp, steps):
+    steps = np.arange(steps)
+    component_state_sequence = sensed_comp.comp.markov_model.history[:]
+    sensor_observation_sequence = [sensor.sensed_history for sensor in sensed_comp.sensors]
 
     # Assuming the following sequences are the simulation results:
     # `component_state_sequence` contains the component states (0=Normal, 1=Degraded, 2=Failed)
     # `sensor_observation_sequence` contains the sensor states (0=Normal, 1=Alarm)
 
     # Parameters for the plot
-    time_steps = np.arange(len(component_state_sequence))  # Time steps
+    # time_steps = np.arange(len(component_state_sequence))  # Time steps
 
     # Create the plot
     plt.figure(figsize=(10, 6))
 
     # Plot the component state as a stepped line
     plt.plot(
-        time_steps,
+        steps,
         component_state_sequence,
-        label="Component State (0=Normal, 1=Degraded, 2=Failed)",
+        label="Component State \n (0=Normal, 1=Degraded, 2=Failed)",
         drawstyle="steps-post",
-        color="blue",
+        color="black",
+        linewidth=5.0,
     )
 
-    # Plot the sensor observations as red scatter points
-    plt.scatter(
-        time_steps,
-        sensor_observation_sequence,
-        color="red",
-        label="Sensor Observation (0=Normal, 1=Alarm)",
-        alpha=0.6,
-    )
+    # plot working sensors and failed sensors differently
+    for i, sensor in enumerate(sensed_comp.sensors):
+        if sensor.state == 0:
+            plt.plot(
+                steps,
+                sensor_observation_sequence[i], '--.g',
+                alpha=0.6,
+                label = 'sensor ' + str(i) + ' working',
+                linewidth=2.5,
+            )
+        else:
+            plt.plot(
+                steps,
+                sensor_observation_sequence[i], '--.r',
+                alpha=0.6,
+                label= 'sensor ' + str(i) + ' failed',
+                linewidth=2.5,
+            )
 
     # Add labels, title, legend, and grid
     plt.xlabel("Time Step")
     plt.ylabel("State")
     plt.title("Simulation of Component States and Sensor Observations")
-    plt.legend()
+    plt.gca().invert_yaxis()
+    plt.legend(loc= "lower left")
     plt.grid()
 
     # Display the plot

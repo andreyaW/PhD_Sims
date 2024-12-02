@@ -30,6 +30,8 @@ class sensor:
         self.name = "sensor"
         self.accuracy = accuracy   
         self.defineMarkovModel()
+
+        self.sensed_history = []  # store the history of the sensor
         
 
     def defineMarkovModel(self)-> None:
@@ -77,7 +79,9 @@ class sensor:
         '''
 
         if self.state == 0:
-            self.last_sensed_state = comp.state
-            return (self.last_sensed_state, 0)  # sensor is in working state 
+            self.last_sensed_state = comp.state # sensor is in working state, and can detect changes in comp state
+            self.sensed_history.append(self.last_sensed_state)
+            return (self.last_sensed_state, 0)  
         else:
-            return (self.last_sensed_state, 1)  # sensor has reached failed state (no more updates from comp)
+            self.sensed_history.append(self.last_sensed_state)
+            return (self.last_sensed_state, 1)  # sensor has failed and gets no more updates from comp

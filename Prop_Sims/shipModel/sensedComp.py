@@ -56,10 +56,11 @@ class sensedComp:
         self.state_name = self.markov_model.stateIdx2Name(self.state)
         self.state_prob = self.comp.state_prob * sensor_probs[sensor_state]
 
-    def draw(self):
+    def draw(self, steps):
         # artist.drawStateSpace(self.markov_model)
         # artist.plotMarkovChainHistory(self.markov_model)
-        artist.drawSensingHistory(self)
+        artist.drawSensingHistory(self, steps)
+
 
     def updateState(self, num_steps):
         '''
