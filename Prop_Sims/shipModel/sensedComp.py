@@ -1,215 +1,137 @@
 from comp import comp
 from sensor import sensor
-from markovChain import markovChain
+# from markovChain import markovChain
+from artistFunctions import drawGraphs as artist
 
 import numpy as np
 
 class sensedComp:
-    ''' a simple model of sensors connected to a component 
-        To run this file enter in terminal: python -i sensedComp.py    
-    
-        EXAMPLE: 
-        >>> c1= sensed_comp()             
-        >>> c1.state           
-        'working'
-        >>> c1.updateState(10)
-        >>> c1.state 
-        'sensors failing'
-        >>> c1.updateState(10)
-        >>> c1.state
-        'sensors failing'
-        >>> c1.updateState(10)
-        >>> c1.state
-        'all sensors failed'
-    
-    '''
-
-    def __init__(self, comp = comp(), sensors_list =  [sensor(0.98) for i in range(3)])->None:
-        """
-        Initialize a sensed component consisting of a component object and a list of attached sensor objects.
-
-        :param comp: comp the component object being sensed
-        :param sensors: list sensor a list of all sensors associated with the component
-        """
-
-        # store the comp and sensor objects to self
+    def __init__(self, comp=comp(), sensors_list=[sensor(0.98) for _ in range(3)]):
         self.comp = comp
-        self.sensors = sensors_list     # default is two "good" sensors
-        self.defineMarkovModel()
+        self.sensors = sensors_list
 
-
-    # ---------------------------------------------------------------------
-    def defineMarkovModel(self)->None:
-        """
-        Creates a new markov chain model for the sensedComp using the components 
-        markov chain object. the state space for a sensed component is the same 
-        state space as the components, plus an additional "undetected" state.
-
-        """        
-        # create a new state space and transition matrix for the sensed component
-        self.createNewStates()
-        self.createTransitionMatrix()
-
-        # use states and transition matrix to define the markov model
-        self.markov_model = markovChain(len(self.state_space), self.transition_matrix)
-        self.markov_model.state_space = self.state_space  
+        # set up the sensed component as a partially observed markov chain
+        self.definePOMPModel()
 
     # ---------------------------------------------------------------------
-    def createNewStates(self):
-        """
-        Creates a new state space for the sensed component by combining the component and sensor state spaces
-        """
+    def definePOMPModel(self):
+        "define the component and sensor pair as a partially observed markov process"
 
-        # create new states as combinations of the component and sensor states
+        self.definePossibleStates()
+        # self.checkSensors()             # function to aggregate the sensed state to a single state and prob
+        # self.setInitialState()
+
+    # ---------------------------------------------------------------------
+    def definePossibleStates(self):
+        
+        # define the state space of the sensed component based on the comp and sensors state spaces
         state_space = {}
-        comp_state_names = list(self.comp.markov_model.state_space.keys())
-        sensor_state_names = list(self.sensors[0].markov_model.state_space.keys())
+        comp_state_names = list(self.comp.markov_model.state_space.values())
+        sensor_state_names = list(self.sensors[0].markov_model.state_space.values())
 
-        for i in range(len(sensor_state_names)):
-            for j in range(len(comp_state_names)):
-                new_state_idx = (i, j)
-                new_state_name = "comp " + str(comp_state_names[j]) + " sensors " + sensor_state_names[i]
-                state_space.update({new_state_name: new_state_idx})
+        for i, comp_state in enumerate(comp_state_names):
+            for j, sensor_state in enumerate(sensor_state_names):
+                new_state_name = f"comp {comp_state} sensors {sensor_state}"  # define state indices
+                new_state_idx = (i,j)                                         # define state names
+                state_space[new_state_idx] = new_state_name
+        
         self.state_space = state_space
 
-    # ---------------------------------------------------------------------
-    def createTransitionMatrix(self):
-        
-        # create new transition matrix
-        transition_matrix = np.zeros((len(self.state_space), len(self.state_space)))
 
-        # iterate over all possible cases of sensor and component states
-        self.checkSensors() # function to aggregate sensor states to sensor state and state probability
-        sensor_state, sensor_state_prob = self.sensor_state, self.sensor_state_prob
-        print('the sensor state is: ', sensor_state)
-        print('the sensor state probability is: ', sensor_state_prob)
-
-        comp_state, comp_state_prob = self.comp.state, self.comp.state_prob
-        print('the component state is: ', self.comp.state)
-        print('the component state probability is: ', self.comp.state_prob)
-        
-
-        # transition_matrix[0,0] = 
-
-        # sensors working and comp working
-        # sensors not workign and comp working
-        
-        # sensors working and comp not working
-        # sensors not working and comp not working
-
-
-
-        # fill in the transitions based on the probabilities of specific conditions 
-        
-        # print("sensor is in state; " + self.sensor_state + "with probability " + self.sensor_state_prob)
-
-        # temp transition matrix 6x6
-        # transition_matrix[0][0] = self.comp_state_prob * self.sensor_state_prob
-    
-
-
-
-    # ---------------------------------------------------------------------
-    def checkSensors(self)->None:
-        """
-        Checks the state of all sensors attached to the component
-        """
-        # start with equal probabilities of sensors working and failing
-        prob_working = 1
-        prob_failed = 1
-
-        # iterate over all sensors and update probabilities
+    def checkSensors(self):
+        '''
+            Check the states of the sensors and return the majority state and the probabilities of each state
+        '''
         sensor_states = [sensor.state for sensor in self.sensors]
-        for i, state in enumerate(sensor_states):
-            if state == 0:
-                prob_working *= self.sensors[i].state_prob[state] 
-            if state ==1: 
-                prob_failed *= self.sensors[i].state_prob[state]
-        
-        # determine the state of the sensors based on the probabilities
-        if prob_working > prob_failed:
-            self.sensor_state = 0 # "working"
-            self.sensor_state_prob = prob_working
-        else:
-            self.sensor_state = 1 # "failing"
-            self.sensor_state_prob = prob_failed
+        comp_state_probs = self.comp.state_prob
 
+        print(sensor_states)
+        print(comp_state_probs)
 
-    # ---------------------------------------------------------------------
     def setInitialState(self):
-        # determine the probability that majority of the sensors are working
-        sensor_state, sensor_state_prob = self.checkSensors()
-        comp_state, comp_state_prob = self.comp.state, self.comp.state_prob
+        sensor_state, sensor_probs = self.checkSensors()
+        comp_state = self.comp.state
 
-        # # choose initial state based on component
-        # if sensor_state == 0:
-        #     self.state = comp_state
-        #     self.state_name = comp_state
-        #     self.state_prob = comp_state_prob * sensor_state_prob
-        # else:
-        #     self.state = comp_state + 1
-        #     self.state_name =  self.markov_model.stateIdx2Name(self.state)
-        #     self.state_prob = comp_state_prob * sensor_state_prob
+        self.state = comp_state * len(sensor_probs) + sensor_state
+        self.state_name = self.markov_model.stateIdx2Name(self.state)
+        self.state_prob = self.comp.state_prob * sensor_probs[sensor_state]
 
-            
-        
+    def draw(self):
+        # artist.drawStateSpace(self.markov_model)
+        # artist.plotMarkovChainHistory(self.markov_model)
+        artist.drawSensingHistory(self)
 
-
-
-
-
-
-
-
-
-
+    def updateState(self, num_steps):
+        '''
+            Update the state of the sensed component based on the sensor and component states
+        '''
+        i=0
+        while i != num_steps:
+            self.comp.updateState(1)
+            for sensor in self.sensors:
+                sensor.updateState(1)
+                sensor.senseState(self.comp)
+            i+=1
+'''
 
 
+    def createTransitionMatrix(self):
+        num_states = len(self.state_space)
+        transition_matrix = np.zeros((num_states, num_states))
 
+        num_comp_states = len(self.comp.markov_model.state_space)
+        num_sensor_states = len(self.sensors[0].markov_model.state_space)
 
+        for i in range(num_comp_states):
+            for j in range(num_sensor_states):
+                current_idx = i * num_sensor_states + j
+                for k in range(num_comp_states):
+                    for l in range(num_sensor_states):
+                        new_idx = k * num_sensor_states + l
+                        transition_matrix[current_idx, new_idx] = (
+                            self.comp.markov_model.transition_matrix[i, k]
+                            * self.sensors[0].markov_model.transition_matrix[j, l]
+                        )
 
+        self.transition_matrix = transition_matrix
 
-    # # # ---------------------------------------------------------------------
-    # def defineMarkovModel(self)->None:
-    #     """
-    #     Creates a model for self using a the components original markov chain object. the state space for a sensed component is the same state space as the component, plus an additional "undetected" state.
-    #     """
+    def checkSensors(self):
+        sensor_states = [sensor.state for sensor in self.sensors]
+        counts = {state: sensor_states.count(state) for state in set(sensor_states)}
 
-    #     # add a state indicating only some sensors working
-    #     self.markov_model = deepcopy(self.comp.markov_model)
+        majority_state = max(counts, key=counts.get)
+        sensor_probs = np.zeros(len(self.sensors[0].markov_model.state_space))
+        for state, count in counts.items():
+            sensor_probs[state] = count / len(sensor_states)
 
-    #     new_states = ["sensors failing" , "sensors_failed"]
-    #     new_states_idx = [len(self.markov_model.state_space) , len(self.markov_model.state_space)+1]
-        
-    #     for i in range(len(new_states)):
-    #         self.markov_model.state_space.update({new_states_idx[i]: new_states[i]})
-    
-    #     # choose initial state based on component
-    #     self.state= self.comp.state
-    #     self.state_num = self.comp.state_num
-    #     self.state_space = self.markov_model.state_space
+        return majority_state, sensor_probs
 
-# ---------------------------------------------------------------------
+    def setInitialState(self):
+        sensor_state, sensor_probs = self.checkSensors()
+        comp_state = self.comp.state
+
+        self.state = comp_state * len(sensor_probs) + sensor_state
+        self.state_name = self.markov_model.stateIdx2Name(self.state)
+        self.state_prob = self.comp.state_prob * sensor_probs[sensor_state]
+
     def updateState(self, num_days):
-        """
-        Predicts the true state of self after a given number of days
-        
-        :param num_days: int number of days to predict ahead from current state
-        
-        """
-        # iterate over the desired number of days
-        for j in range (num_days):
-            
-            # update states of all attached sensors and the component         
-            num_sensors = len(self.sensors)
-            for i in range(num_sensors):
-                self.sensors[i].updateState(1)
+        for _ in range(num_days):
+            for sensor in self.sensors:
+                sensor.updateState(1)
             self.comp.updateState(1)
 
-            self.checkSensors()
-            sensors_state, sensors_prob = self.sensor_state, self.sensor_state_prob
-            comp_state, comp_prob = self.comp.state, self.comp.state_prob
+            sensor_state, sensor_probs = self.checkSensors()
+            comp_state = self.comp.state
+            current_state_idx = comp_state * len(sensor_probs) + sensor_state
+            next_state_probs = self.transition_matrix[current_state_idx]
+            next_state_idx = np.random.choice(
+                range(len(next_state_probs)), p=next_state_probs
+            )
+            
+            # save important attributes to self                        
+            self.state = next_state_idx
+            self.state_name = self.markov_model.stateIdx2Name(self.state)
+            self.state_prob= self.state_prob * next_state_probs
 
-            print(comp_state, sensors_state)
-
+'''
 # ---------------------------------------------------------------------

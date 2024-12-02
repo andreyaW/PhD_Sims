@@ -97,12 +97,6 @@ class markovChain:
         self.state_prob = state_prob
 
 
-
-
-
-
-
-
 # ------------------------------------------------------------------------------------  
     def nextState(self, current_state):
         """
@@ -143,7 +137,7 @@ class markovChain:
             current_state = next_state
 
         # save important attributes to self                        
-        self.history = self.history + history
+        self.history = self.history + history  
         self.state = current_state
         self.state_name = self.stateIdx2Name(current_state)
 
@@ -192,5 +186,9 @@ class markovChain:
         >>> mc.draw()
 
         """
+        artist.drawStateSpace(self)
+        artist.plotMarkovChainHistory(self)
         artist.drawMarkovChain(self)
         artist.plotMarkovChainHistory(self)
+
+

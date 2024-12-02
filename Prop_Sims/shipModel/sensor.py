@@ -41,6 +41,7 @@ class sensor:
         num_states= 2
         transition_mat = np.array([[self.accuracy, 1.0 -self.accuracy],
                                    [0.0  ,    1.0]])        # failed is absorbing state
+#         # save important attributes to self 
         mC = markovChain(num_states, transition_mat)
         
         # update the name of the markov model to sensor
@@ -50,9 +51,8 @@ class sensor:
         self.markov_model = mC
         self.state = mC.state
         self.state_prob = mC.state_prob
-        self.state_name = mC.stateIdx2Name(mC.state)    
+        self.state_name = mC.stateIdx2Name(mC.state)   
         
-
 # ---------------------------------------------------------------------
     def updateState(self, num_days)-> None:
         """
@@ -70,4 +70,14 @@ class sensor:
         self.state_prob = mC.state_prob
         self.state_name = mC.stateIdx2Name(mC.state)
 
-# ---------------------------------------------------------------------
+
+    def senseState(self, comp):
+        '''
+        Determine if the sensor is still able to communicate with the component and update the sensed state accordingly
+        '''
+
+        if self.state == 0:
+            self.last_sensed_state = comp.state
+            return (self.last_sensed_state, 0)  # sensor is in working state 
+        else:
+            return (self.last_sensed_state, 1)  # sensor has reached failed state (no more updates from comp)

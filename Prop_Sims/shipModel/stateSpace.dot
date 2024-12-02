@@ -1,0 +1,11 @@
+digraph {
+working [label=working];
+"partially working (1)" [label="partially\n working \n(1)"];
+failed [label=failed];
+working -> working [key=0, weight=0.98, label=0.98, connectionstyle="arc3,rad=-5"];
+working -> "partially working (1)" [key=0, weight=0.01, label=0.01, connectionstyle="arc3,rad=-5"];
+working -> failed [key=0, weight=0.01, label=0.01, connectionstyle="arc3,rad=-5"];
+"partially working (1)" -> "partially working (1)" [key=0, weight=0.98, label=0.98, connectionstyle="arc3,rad=-5"];
+"partially working (1)" -> failed [key=0, weight=0.02, label=0.02, connectionstyle="arc3,rad=-5"];
+failed -> failed [key=0, weight=1.0, label=1.0, connectionstyle="arc3,rad=-5"];
+}
