@@ -3,12 +3,13 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 
+from graphviz import Digraph
+
 # ----------------------------------------------------------------------------------------------
-def wrap_label(label, max_length=9):
+def wrapLabel(label, max_length=9):
     """
     Splits a label into multiple lines if it exceeds max_length.
     """
-    print(label)
     if len(label) <= max_length:
         return label
     wrapped_label = ""
@@ -17,95 +18,75 @@ def wrap_label(label, max_length=9):
     return wrapped_label.strip()
 
 # ----------------------------------------------------------------------------------------------
-def add_nodes(G, pos, state_names):
+def addNodes(dot, state_names, pos):
     """
-    Adds the nodes of the graph with specified attributes.
+    Adds nodes to the Graphviz Digraph with specified attributes and positions.
     """
     fixed_distance = 2.5  # Fixed distance between nodes (width)
     fixed_distance_y = 5  # Fixed distance between nodes (height)
     updated_poses = {}
 
-    # Add states (nodes) to the graph
     for i, state in enumerate(state_names):
-        print(state)
-        G.add_node(state, label = wrap_label(state))  # Add nodes with wrapped labels
-    
-        # Position the failure node below all others
-        if state == state_names[-1]:
-            if type(pos[0]) == tuple :
-                new_pos = (pos[i][0]*fixed_distance, -pos[i][1]*fixed_distance_y - 5 )  # for two level horizontal graph (sensed comp)
-                updated_poses.update({state:new_pos})  
-            elif type(pos[0]) == int:
-                new_pose = (pos[i]*fixed_distance, -15) # for horizontal graph (comp or sensor only)
-                updated_poses.update({state:new_pose}) 
+        label = wrapLabel(state)
+        if state == state_names[-1]:  # Failure node below others
+            if isinstance(pos[0], tuple):
+                new_pos = (pos[i][0] * fixed_distance, -pos[i][1] * fixed_distance_y - 5)
+            else:
+                new_pos = (pos[i] * fixed_distance, -15)
+        else:  # Other nodes in a horizontal line
+            if isinstance(pos[0], tuple):
+                new_pos = (pos[i][0] * fixed_distance, -pos[i][1] * fixed_distance_y)
+            else:
+                new_pos = (pos[i] * fixed_distance, 0)
 
-        # position all other nodes in a horizontal line
-        elif type(pos[0]) == tuple :
-            new_pos = (pos[i][0]*fixed_distance, -pos[i][1]*fixed_distance_y)  # for two level horizontal graph (sensed comp)
-            updated_poses.update({state:new_pos})  
-        elif type(pos[0]) == int:
-            new_pose = (pos[i]*fixed_distance, 0) # for horizontal graph (comp or sensor only)
-            updated_poses.update({state:new_pose}) 
-    
-    pos = updated_poses
-    return pos
+        updated_poses[state] = new_pos
+        dot.node(state, label=label, shape='circle', style='filled', fillcolor='white')
+
+    return updated_poses
 
 # ----------------------------------------------------------------------------------------------
-def add_edges(G, states, transition_matrix):
+def addEdges(dot, states, transition_matrix):
     """
-    Adds the edges of the graph with specified attributes.
-    """    
-    # Add edges to the graph
-    for i,state_i in enumerate(states):
-
+    Adds edges to the Graphviz Digraph with specified attributes.
+    """
+    for i, state_i in enumerate(states):
         for j, state_j in enumerate(states):
-
             transition_prob = transition_matrix[i][j]
             if transition_prob > 0:
-                G.add_edge(state_i, state_j, weight=transition_prob, label=round(transition_prob, 2), connectionstyle='arc3,rad=-5') 
-               
+                label = str(round(transition_prob, 2))
+                dot.edge(state_i, state_j, label=label)
+
 # ----------------------------------------------------------------------------------------------
-def drawMarkovChain(mC)->None:
-    # grab necessary values from the Markov Chain object
+def drawMarkovChain(mC):
+    """
+    Draws a Markov Chain using Graphviz.
+    """
+    # Grab necessary values from the Markov Chain object
     state_numbers = list(mC.state_space.values())
     state_names = list(mC.state_space.keys())
-    graph_params ={ 'node_size': 1750, 
-                    'node_color': 'white', 
-                    'node_font_size' : 7, 'probs_font_size': 15, 'font_weight': 'bold', 
-                    'arrowsize': 15, 'arrowstyle': '->',
-                    'edge_color':'black'}   
 
-    # Create and draw a directed graph
-    plt.figure(figsize=(10, 3))
+    # Create a Graphviz Digraph
+    dot = Digraph(format='png', engine='dot')
+    dot.attr(rankdir='LR', nodesep='0.5', ranksep='0.5')
 
-    G = nx.MultiDiGraph()
-    pos = add_nodes(G, state_numbers, state_names)
-    add_edges(G, state_names, mC.transition_matrix)    
-    nx.draw(G, pos, with_labels=False, node_size=graph_params['node_size'], node_color=graph_params['node_color'],
-            edgecolors='grey', edge_color=graph_params['edge_color'],
-            font_size=graph_params['node_font_size'], font_weight=graph_params['font_weight'], 
-            arrowsize=graph_params['arrowsize'], arrowstyle=graph_params['arrowstyle'])
+    # Add nodes and edges
+    pos = addNodes(dot, state_names, state_numbers)
+    addEdges(dot, state_names, mC.transition_matrix)
 
-    # Use custom labels for nodes (use the 'label' attribute)
-    node_labels = nx.get_node_attributes(G, 'label') 
-    nx.draw_networkx_labels(G, pos, labels=node_labels, font_size=graph_params['node_font_size'], font_weight=graph_params['font_weight'])
+    # Render the graph
+    dot.render('markov_chain', cleanup=True)  # Generates markov_chain.png and removes intermediate files
 
-    # Use custom labels for edges (use the 'weight' attribute)
-    edge_labels= nx.get_edge_attributes(G, 'weight')
+    # Display the rendered graph
+    plt.figure(figsize=(10, 10))
+    plt.imshow(plt.imread('markov_chain.png'))
+    plt.axis('off')
+    plt.show()
+    
+    # # Display the rendered graph
+    # from IPython.display import Image
+    # return Image(filename='markov_chain.png')
 
-    # update each pos to move up
-    edge_label_pos = {}
-    for position in pos:
-        edge_label_pos[position] = (pos[position][0], pos[position][1] + 1) 
-    nx.draw_networkx_edge_labels(G, edge_label_pos, edge_labels=edge_labels, font_size=graph_params['probs_font_size']-5, font_weight=graph_params['font_weight'], bbox=dict(boxstyle="round,pad=0.3", edgecolor='black', facecolor='lightgrey'), alpha=0.8)
 
-    # Update the axis limits
-    x0, x1 = plt.xlim()  # Get current axis limits
-    plt.title("Markov Chain: " + mC.name, fontsize=10)
-    y0, y1 = plt.ylim()
-    plt.ylim(y0-1, y1 +2)
-    plt.axis('on')
-    nx.drawing.nx_pydot.write_dot(G, 'markov.dot')
 
 #----------------------------------------------------------------------------------------------
 def plotMarkovChainHistory(mC)->None:
@@ -159,7 +140,7 @@ def drawSensingHistory(sensed_comp, steps):
 
     # Assuming the following sequences are the simulation results:
     # `component_state_sequence` contains the component states (0=Normal, 1=Degraded, 2=Failed)
-    # `sensor_observation_sequence` contains the sensor states (0=Normal, 1=Alarm)
+    # `sensor_observation_sequence` contains the sensed states of the sensors individually (0=Normal, 1=Degraded, 2=Failed)
 
     # Parameters for the plot
     # time_steps = np.arange(len(component_state_sequence))  # Time steps
@@ -184,16 +165,16 @@ def drawSensingHistory(sensed_comp, steps):
                 steps,
                 sensor_observation_sequence[i], '--.g',
                 alpha=0.6,
-                label = 'sensor ' + str(i) + ' working',
-                linewidth=2.5,
+                label = 'sensor ' + str(i),
+                linewidth=5,
             )
         else:
             plt.plot(
                 steps,
                 sensor_observation_sequence[i], '--.r',
                 alpha=0.6,
-                label= 'sensor ' + str(i) + ' failed',
-                linewidth=2.5,
+                label= 'sensor ' + str(i),
+                linewidth=5,
             )
 
     # Add labels, title, legend, and grid
@@ -206,3 +187,5 @@ def drawSensingHistory(sensed_comp, steps):
 
     # Display the plot
     plt.show()
+
+    print([sensor.state for sensor in sensed_comp.sensors])

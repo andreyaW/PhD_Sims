@@ -73,8 +73,15 @@ class sensedComp:
                 sensor.updateState(1)
                 sensor.senseState(self.comp)
             i+=1
-'''
 
+    def reset(self):
+        self.comp.markov_model.history = []
+        for sensor in self.sensors:
+            sensor.sensed_history = []
+            sensor.markov_model.history = []
+
+
+'''
 
     def createTransitionMatrix(self):
         num_states = len(self.state_space)

@@ -77,7 +77,6 @@ class sensor:
         '''
         Determine if the sensor is still able to communicate with the component and update the sensed state accordingly
         '''
-
         if self.state == 0:
             self.last_sensed_state = comp.state # sensor is in working state, and can detect changes in comp state
             self.sensed_history.append(self.last_sensed_state)
