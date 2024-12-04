@@ -18,8 +18,75 @@ class sensedComp:
         "define the component and sensor pair as a partially observed markov process"
 
         self.definePossibleStates()
+        self.defineTransitionMatrix()
         # self.checkSensors()             # function to aggregate the sensed state to a single state and prob
         # self.setInitialState()
+
+    def defineTransitionMatrix(self):
+        '''define the transition matrix of the POMP model'''
+        
+        num_states = len(self.state_space)
+        transition_matrix = np.zeros((num_states, num_states))
+
+        num_comp_states = len(self.comp.markov_model.state_space)
+        num_sensor_states = len(self.sensors[0].markov_model.state_space)
+
+        comp_current_probs = self.comp.state_prob
+        comp_transition_matrix = self.comp.markov_model.transition_matrix
+        
+        sensor_current_probs = self.checkSensors()
+        
+
+
+
+        # possible transitions:
+            # SENSORS WORKING (even rows)
+        
+        transition_matrix[0][0] = # (0,0) -> (0,0)    recurring state
+            # (0,0) -> (0,1)
+            # (0,0) -> (1,0)
+            # (0,0) -> (1,1)
+            # (0,0) -> (2,0)
+            # (0,0) -> (2,1)
+
+            # (1,0) -> (1,0)   recurring state
+            # (1,0) -> (1,1)
+            # (1,0) -> (2,0)
+            # (1,0) -> (2,1)
+
+            # (2,0) -> (2,0)   recurring state
+            # (2,0) -> (2,1)
+
+            # SENSORS DEGRADED (odd rows)        
+            # (0,1) -> (0,1)   recurring state
+            # (0,1) -> (1,1)
+            # (0,1) -> (2,1)
+            
+            # (1,1) -> (1,1)   recurring state
+            # (1,1) -> (2,1)
+
+            # (2,1) -> (2,1)   recurring state
+
+
+
+        # num_states = len(self.state_space)
+        # transition_matrix = np.zeros((num_states, num_states))
+
+        # num_comp_states = len(self.comp.markov_model.state_space)
+        # num_sensor_states = len(self.sensors[0].markov_model.state_space)
+
+        # for i in range(num_comp_states):
+        #     for j in range(num_sensor_states):
+        #         current_idx = i * num_sensor_states + j
+        #         for k in range(num_comp_states):
+        #             for l in range(num_sensor_states):
+        #                 new_idx = k * num_sensor_states + l
+        #                 transition_matrix[current_idx, new_idx] = (
+        #                     self.comp.markov_model.transition_matrix[i, k]
+        #                     * self.sensors[0].markov_model.transition_matrix[j, l]
+        #                 )
+
+        # self.transition_matrix = transition_matrix
 
     # ---------------------------------------------------------------------
     def definePossibleStates(self):
@@ -33,7 +100,7 @@ class sensedComp:
             for j, sensor_state in enumerate(sensor_state_names):
                 new_state_name = f"comp {comp_state} sensors {sensor_state}"  # define state indices
                 new_state_idx = (i,j)                                         # define state names
-                state_space[new_state_idx] = new_state_name
+                state_space[new_state_name] = new_state_idx
         
         self.state_space = state_space
 
@@ -56,11 +123,12 @@ class sensedComp:
         self.state_name = self.markov_model.stateIdx2Name(self.state)
         self.state_prob = self.comp.state_prob * sensor_probs[sensor_state]
 
+
     def draw(self, steps):
         # artist.drawStateSpace(self.markov_model)
         # artist.plotMarkovChainHistory(self.markov_model)
         artist.drawSensingHistory(self, steps)
-
+        artist.drawMarkovChain(self)
 
     def updateState(self, num_steps):
         '''
@@ -82,26 +150,6 @@ class sensedComp:
 
 
 '''
-
-    def createTransitionMatrix(self):
-        num_states = len(self.state_space)
-        transition_matrix = np.zeros((num_states, num_states))
-
-        num_comp_states = len(self.comp.markov_model.state_space)
-        num_sensor_states = len(self.sensors[0].markov_model.state_space)
-
-        for i in range(num_comp_states):
-            for j in range(num_sensor_states):
-                current_idx = i * num_sensor_states + j
-                for k in range(num_comp_states):
-                    for l in range(num_sensor_states):
-                        new_idx = k * num_sensor_states + l
-                        transition_matrix[current_idx, new_idx] = (
-                            self.comp.markov_model.transition_matrix[i, k]
-                            * self.sensors[0].markov_model.transition_matrix[j, l]
-                        )
-
-        self.transition_matrix = transition_matrix
 
     def checkSensors(self):
         sensor_states = [sensor.state for sensor in self.sensors]

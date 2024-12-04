@@ -1,8 +1,8 @@
 import numpy as np
-import networkx as nx
+# import networkx as nx
 import matplotlib.pyplot as plt
-from matplotlib.patches import Ellipse
 
+from matplotlib.patches import Ellipse
 from graphviz import Digraph
 
 # ----------------------------------------------------------------------------------------------
@@ -22,27 +22,75 @@ def addNodes(dot, state_names, pos):
     """
     Adds nodes to the Graphviz Digraph with specified attributes and positions.
     """
+
+    print('the pos is : ' , pos)
+    print('the state_names is : ' , state_names)
+    print(type(dot))
+    
     fixed_distance = 2.5  # Fixed distance between nodes (width)
     fixed_distance_y = 5  # Fixed distance between nodes (height)
     updated_poses = {}
 
     for i, state in enumerate(state_names):
         label = wrapLabel(state)
-        if state == state_names[-1]:  # Failure node below others
+        new_pos = (0,0)
+
+        # Failure node below others
+        if state == state_names[-1]:  
             if isinstance(pos[0], tuple):
-                new_pos = (pos[i][0] * fixed_distance, -pos[i][1] * fixed_distance_y - 5)
+                print('here 1')
+                new_pos = (pos[i][0] * fixed_distance, -15)
             else:
                 new_pos = (pos[i] * fixed_distance, -15)
-        else:  # Other nodes in a horizontal line
+        
+        # Other nodes in a horizontal line
+        else:  
+            print('here 2')
             if isinstance(pos[0], tuple):
-                new_pos = (pos[i][0] * fixed_distance, -pos[i][1] * fixed_distance_y)
+                new_pos = (pos[i][0] * fixed_distance, pos[i][1])
             else:
                 new_pos = (pos[i] * fixed_distance, 0)
+        
+        dot.node(state, pos=f"{new_pos[0]},{new_pos[1]}!"  , label=label, shape='circle', style='filled', fillcolor='white')
+
+    return dot
+
+
+'''
+def addNodes(dot, state_names, pos):
+    """
+    Adds nodes to the Graphviz Digraph with specified attributes and positions.
+    Ensures nodes at (0,0), (1,0), and (2,0) are aligned horizontally.
+    """
+    print('the pos is:', pos)
+    print('the state_names is:', state_names)
+    print(type(dot))
+    
+    fixed_distance = 2.5  # Fixed distance between nodes (width)
+    fixed_distance_y = 5  # Fixed distance between nodes (height)
+    updated_poses = {}
+
+    for i, state in enumerate(state_names):
+        label = wrapLabel(state)
+
+        # Adjust positions for horizontal alignment of specific nodes
+        if pos[i][1] == 0:  # Nodes at y=0
+            new_pos = (pos[i][0] * fixed_distance, 0)  # Keep y=0
+        else:  # Other nodes maintain their vertical positioning
+            new_pos = (pos[i][0] * fixed_distance, -pos[i][1] * fixed_distance_y)
 
         updated_poses[state] = new_pos
-        dot.node(state, label=label, shape='circle', style='filled', fillcolor='white')
+        dot.node(
+            state, 
+            label=label, 
+            shape='circle', 
+            style='filled', 
+            fillcolor='white',
+            pos=f"{new_pos[0]},{new_pos[1]}!"  # Explicit positioning
+        )
 
     return updated_poses
+'''
 
 # ----------------------------------------------------------------------------------------------
 def addEdges(dot, states, transition_matrix):
@@ -70,7 +118,7 @@ def drawMarkovChain(mC):
     dot.attr(rankdir='LR', nodesep='0.5', ranksep='0.5')
 
     # Add nodes and edges
-    pos = addNodes(dot, state_names, state_numbers)
+    dot= addNodes(dot, state_names, state_numbers)
     addEdges(dot, state_names, mC.transition_matrix)
 
     # Render the graph
@@ -81,12 +129,10 @@ def drawMarkovChain(mC):
     plt.imshow(plt.imread('markov_chain.png'))
     plt.axis('off')
     plt.show()
-    
+
     # # Display the rendered graph
     # from IPython.display import Image
     # return Image(filename='markov_chain.png')
-
-
 
 #----------------------------------------------------------------------------------------------
 def plotMarkovChainHistory(mC)->None:
