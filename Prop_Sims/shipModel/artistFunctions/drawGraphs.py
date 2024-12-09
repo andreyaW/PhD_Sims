@@ -26,9 +26,9 @@ def addNodes(dot, state_names, pos):
     Adds nodes to the Graphviz Digraph with specified attributes and positions.
     """
 
-    print('the pos is : ' , pos)
-    print('the state_names is : ' , state_names)
-    print(type(dot))
+    # print('the pos is : ' , pos)
+    # print('the state_names is : ' , state_names)
+    # print(type(dot))
     
     fixed_distance = 2.5  # Fixed distance between nodes (width)
     fixed_distance_y = 5  # Fixed distance between nodes (height)
@@ -48,7 +48,6 @@ def addNodes(dot, state_names, pos):
         
         # Other nodes in a horizontal line
         else:  
-            print('here 2')
             if isinstance(pos[0], tuple):
                 new_pos = (pos[i][0] * fixed_distance, pos[i][1])
             else:
@@ -117,28 +116,22 @@ def plotMarkovChainHistory(mC)->None:
 
 
 
-
 # Sensed Component Functions
 # ----------------------------------------------------------------------------------------------
 
 def drawSensedHistory(sensed_comp, steps):
     steps = np.arange(steps)
-    component_state_sequence = sensed_comp.comp.markov_model.history[:]
-    sensor_observation_sequence = [sensor.sensed_history for sensor in sensed_comp.sensors]
-    
-    #PRINTING THE COMPONENT STATE AND SENSOR OBSERVATION SEQUENCE TO EXCEL 
+    component_state_sequence = np.array(sensed_comp.comp.markov_model.history)
+    sensor_observation_sequence = [np.array(sensor.sensed_history) for sensor in sensed_comp.sensors]
+    sensor_health_sequence = [np.array(sensor.markov_model.history) for sensor in sensed_comp.sensors]
+
+    # print(sensor_health_sequence)
+
+    #PRINTING THE COMPONENT STATE AND SENSOR OBSERVATION SEQUENCE TO EXCEL for post analysis 
     df = pd.DataFrame(component_state_sequence)
     df.to_excel("Component_State_Sequence.xlsx")
     df = pd.DataFrame(sensor_observation_sequence)
     df.to_excel("Sensor_Observation_Sequence.xlsx")
-        
-
-    # Assuming the following sequences are the simulation results:
-    # `component_state_sequence` contains the component states (0=Normal, 1=Degraded, 2=Failed)
-    # `sensor_observation_sequence` contains the sensed states of the sensors individually (0=Normal, 1=Degraded, 2=Failed)
-
-    # Parameters for the plot
-    # time_steps = np.arange(len(component_state_sequence))  # Time steps
 
     # Create the plot
     plt.figure(figsize=(10, 6))
@@ -150,30 +143,55 @@ def drawSensedHistory(sensed_comp, steps):
         label="Component State \n (0=Normal, 1=Degraded, 2=Failed)",
         drawstyle="steps-post",
         color="black",
-        linewidth=5.0,
+        linewidth=2,
+        alpha=0.8,
+        linestyle="-",
     )
 
-    # plot working sensors and failed sensors differently
+    # Plot the sensor observations based on the health of the sensors over time
+    colors = ["green", "red", "blue"]
     for i, sensor in enumerate(sensed_comp.sensors):
-        if sensor.state == 0:
-            plt.plot(
-                steps,
-                sensor_observation_sequence[i], '--.g',
-                alpha=0.6,
-                label = 'sensor ' + str(i),
-                linewidth=5,
-            )
-        else:
-            plt.plot(
-                steps,
-                sensor_observation_sequence[i], 'xr',
-                alpha=0.6,
-                label= 'sensor ' + str(i),
-                linewidth=5,
-                markersize=3,
-            )
+
+        # filter out the healthy sensor readings from the sensors sensed history
+        mask = sensor_health_sequence[i] == 0
+        healthy_readings = sensor_observation_sequence[i][mask]
+        healthy_steps = steps[mask]
+        plt.plot(
+            healthy_steps,
+            healthy_readings,
+            '.', 
+            color= colors[i],
+            alpha=0.6,
+            markersize=6,
+            label = "Sensor " + str(i) + " Healthy Readings"
+        )
 
 
+        # filter out the failed sensor readings from the sensors sensed history
+        mask = sensor_health_sequence[i] == 1
+        failed_readings = sensor_observation_sequence[i][mask]
+        failed_steps = steps[mask]
+        plt.plot(
+            failed_steps,
+            failed_readings,
+            '--',
+            color= colors[i],
+            alpha=0.6,
+            linewidth=2 
+            )
+
+        # plot the intial sensor failure as a X
+        if len(failed_steps) > 0:
+            plt.plot(
+                failed_steps[0],
+                failed_readings[0],
+                'X',
+                color= colors[i],
+                alpha=0.6,
+                markersize=14,
+                label = "Sensor " + str(i) + " Initial Sensor Failure"
+                )
+        
     # arrange the graph to always show all possible component states
     comp_state_space = sensed_comp.comp.markov_model.state_space
     plt.yticks(range(len(comp_state_space)), labels=["Normal", "Degraded", "Failed"])

@@ -33,7 +33,7 @@ class sensor:
 
         self.sensed_history = []  # store the history of the sensor
         
-
+# ---------------------------------------------------------------------
     def defineMarkovModel(self)-> None:
         """
         Creates a model for self using a markov chain object
@@ -41,9 +41,8 @@ class sensor:
         
         # initialize the sensor as a 2 state markov sensor model
         num_states= 2
-        transition_mat = np.array([[self.accuracy, 1.0 -self.accuracy],
-                                   [0.0  ,    1.0]])        # failed is absorbing state
-#         # save important attributes to self 
+        transition_mat = np.array([[self.accuracy, (1.0 -self.accuracy)],
+                                   [0.0  ,    1.0]])        # failed is absorbing state         # save important attributes to self 
         mC = markovChain(num_states, transition_mat)
         
         # update the name of the markov model to sensor
@@ -72,22 +71,19 @@ class sensor:
         self.state_prob = mC.state_prob
         self.state_name = mC.stateIdx2Name(mC.state)
 
-
 # ---------------------------------------------------------------------
-
     def reset(self)->None:
         '''reset the component to its initial state'''
         self.markov_model.reset()
         self.sensed_history = []  # reset the history of the sensor
 
 # ---------------------------------------------------------------------
-
     def senseState(self, comp):
         '''
         Determine if the sensor is still able to communicate with the component and update the sensed state accordingly
         '''
         if self.state == 0:
-            self.last_sensed_state = comp.state # sensor is in working state, and can detect changes in comp state
+            self.last_sensed_state = comp.markov_model.history[-1] # sensor is in working state, and can detect changes in comp state
             self.sensed_history.append(self.last_sensed_state)
             return (self.last_sensed_state, 0)  
         else:
@@ -96,6 +92,10 @@ class sensor:
         
 # ---------------------------------------------------------------------
 
+
+
+
+# ---------------------------------------------------------------------
 def main():
     
     # Create an instance of the sensor
