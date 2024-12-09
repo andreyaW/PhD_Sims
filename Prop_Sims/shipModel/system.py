@@ -1,4 +1,4 @@
-from sensedComp import sensedComp
+from Prop_Sims.shipModel.sensedComp_old import sensedComp
 
 class system: 
     '''

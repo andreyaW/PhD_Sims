@@ -143,6 +143,17 @@ class markovChain:
 
 
 # ---------------------------------------------------------------------
+    def reset(self):
+        """
+        Resets the Markov Chain to its initial state
+        
+        EX:
+            >>> mc.reset()
+        
+        """
+        self.history = []
+
+# ---------------------------------------------------------------------
     def stateIdx2Name(self, idx):
         """
             Allows a users to quickly go between the state number and state name (for plotting mostly)

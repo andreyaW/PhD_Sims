@@ -72,5 +72,27 @@ class comp:
         self.state_prob = mC.state_prob
         self.state_name = mC.stateIdx2Name(mC.state)
 
-        
 # ---------------------------------------------------------------------
+
+    def reset(self)->None:
+        '''reset the component to its initial state'''
+        self.markov_model.reset()
+
+
+# ---------------------------------------------------------------------
+def main():
+
+    # Create an instance of the component
+    c1 = comp()
+    
+    # Print initial state
+    print(f"Initial state: {c1.state_name}")
+    
+    # Update state after 2 days
+    c1.updateState(2)
+    
+    # Print updated state
+    print(f"State after 2 days: {c1.state_name}")
+
+if __name__ == "__main__":
+    main()

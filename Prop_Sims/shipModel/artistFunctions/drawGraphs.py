@@ -1,10 +1,14 @@
 import numpy as np
-# import networkx as nx
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from matplotlib.patches import Ellipse
 from graphviz import Digraph
 
+
+
+
+# Markov Chain Functions
 # ----------------------------------------------------------------------------------------------
 def wrapLabel(label, max_length=9):
     """
@@ -17,7 +21,6 @@ def wrapLabel(label, max_length=9):
         wrapped_label += label[i:i + max_length] + "\n"
     return wrapped_label.strip()
 
-# ----------------------------------------------------------------------------------------------
 def addNodes(dot, state_names, pos):
     """
     Adds nodes to the Graphviz Digraph with specified attributes and positions.
@@ -55,44 +58,6 @@ def addNodes(dot, state_names, pos):
 
     return dot
 
-
-'''
-def addNodes(dot, state_names, pos):
-    """
-    Adds nodes to the Graphviz Digraph with specified attributes and positions.
-    Ensures nodes at (0,0), (1,0), and (2,0) are aligned horizontally.
-    """
-    print('the pos is:', pos)
-    print('the state_names is:', state_names)
-    print(type(dot))
-    
-    fixed_distance = 2.5  # Fixed distance between nodes (width)
-    fixed_distance_y = 5  # Fixed distance between nodes (height)
-    updated_poses = {}
-
-    for i, state in enumerate(state_names):
-        label = wrapLabel(state)
-
-        # Adjust positions for horizontal alignment of specific nodes
-        if pos[i][1] == 0:  # Nodes at y=0
-            new_pos = (pos[i][0] * fixed_distance, 0)  # Keep y=0
-        else:  # Other nodes maintain their vertical positioning
-            new_pos = (pos[i][0] * fixed_distance, -pos[i][1] * fixed_distance_y)
-
-        updated_poses[state] = new_pos
-        dot.node(
-            state, 
-            label=label, 
-            shape='circle', 
-            style='filled', 
-            fillcolor='white',
-            pos=f"{new_pos[0]},{new_pos[1]}!"  # Explicit positioning
-        )
-
-    return updated_poses
-'''
-
-# ----------------------------------------------------------------------------------------------
 def addEdges(dot, states, transition_matrix):
     """
     Adds edges to the Graphviz Digraph with specified attributes.
@@ -104,7 +69,6 @@ def addEdges(dot, states, transition_matrix):
                 label = str(round(transition_prob, 2))
                 dot.edge(state_i, state_j, label=label)
 
-# ----------------------------------------------------------------------------------------------
 def drawMarkovChain(mC):
     """
     Draws a Markov Chain using Graphviz.
@@ -134,7 +98,6 @@ def drawMarkovChain(mC):
     # from IPython.display import Image
     # return Image(filename='markov_chain.png')
 
-#----------------------------------------------------------------------------------------------
 def plotMarkovChainHistory(mC)->None:
     """
     A function to plot the history of the Markov Chain
@@ -150,39 +113,25 @@ def plotMarkovChainHistory(mC)->None:
     # plt.xticks(0, len(mC.history))
     plt.yticks(range(len(mC.state_space)))
     plt.savefig("./markovChainHistoryPlot_"+ mC.name.upper(), bbox_inches='tight')
+#----------------------------------------------------------------------------------------------
 
+
+
+
+# Sensed Component Functions
 # ----------------------------------------------------------------------------------------------
-def drawStateSpace(mC):
-    """
-        Draws the state space of the Markov Chain Model
-    """
 
-    # grab necessary values from the Markov Chain object
-    state_numbers = list(mC.state_space.values())
-    state_names = list(mC.state_space.keys())
-
-    # Create and draw circle graph
-    plt.figure(figsize=(10, 3))
-
-    for i, state in enumerate(state_names):
-
-        ellipse = Ellipse((0, 0), width=0.75+0.2*i, height=1+2*i, color='black', fill=False)
-        plt.text(0, i, state, fontsize=8, ha='center')
-        
-        #plt.gca().add_artist(plt.Circle((0, .045), radius=0.2+0.3*i, color='black', fill=False))
-        plt.gca().add_artist(ellipse)
-
-    plt.axis('off')
-    plt.title(f'{mC.name.upper()} State Space')
-    plt.xlim(-1, 1)
-    plt.ylim(-len(state_names)+.5, len(state_names)-.5)
-    plt.show()
-
-# ----------------------------------------------------------------------------------------------
-def drawSensingHistory(sensed_comp, steps):
+def drawSensedHistory(sensed_comp, steps):
     steps = np.arange(steps)
     component_state_sequence = sensed_comp.comp.markov_model.history[:]
     sensor_observation_sequence = [sensor.sensed_history for sensor in sensed_comp.sensors]
+    
+    #PRINTING THE COMPONENT STATE AND SENSOR OBSERVATION SEQUENCE TO EXCEL 
+    df = pd.DataFrame(component_state_sequence)
+    df.to_excel("Component_State_Sequence.xlsx")
+    df = pd.DataFrame(sensor_observation_sequence)
+    df.to_excel("Sensor_Observation_Sequence.xlsx")
+        
 
     # Assuming the following sequences are the simulation results:
     # `component_state_sequence` contains the component states (0=Normal, 1=Degraded, 2=Failed)
@@ -217,21 +166,55 @@ def drawSensingHistory(sensed_comp, steps):
         else:
             plt.plot(
                 steps,
-                sensor_observation_sequence[i], '--.r',
+                sensor_observation_sequence[i], 'xr',
                 alpha=0.6,
                 label= 'sensor ' + str(i),
                 linewidth=5,
+                markersize=3,
             )
+
+
+    # arrange the graph to always show all possible component states
+    comp_state_space = sensed_comp.comp.markov_model.state_space
+    plt.yticks(range(len(comp_state_space)), labels=["Normal", "Degraded", "Failed"])
 
     # Add labels, title, legend, and grid
     plt.xlabel("Time Step")
     plt.ylabel("State")
     plt.title("Simulation of Component States and Sensor Observations")
     plt.gca().invert_yaxis()
-    plt.legend(loc= "lower left")
+    plt.legend()
     plt.grid()
 
     # Display the plot
     plt.show()
 
-    print([sensor.state for sensor in sensed_comp.sensors])
+# ----------------------------------------------------------------------------------------------
+
+
+
+def drawStateSpace(mC):
+    """
+        Draws the state space of the Markov Chain Model
+    """
+
+    # grab necessary values from the Markov Chain object
+    state_numbers = list(mC.state_space.values())
+    state_names = list(mC.state_space.keys())
+
+    # Create and draw circle graph
+    plt.figure(figsize=(10, 3))
+
+    for i, state in enumerate(state_names):
+
+        ellipse = Ellipse((0, 0), width=0.75+0.2*i, height=1+2*i, color='black', fill=False)
+        plt.text(0, i, state, fontsize=8, ha='center')
+        
+        #plt.gca().add_artist(plt.Circle((0, .045), radius=0.2+0.3*i, color='black', fill=False))
+        plt.gca().add_artist(ellipse)
+
+    plt.axis('off')
+    plt.title(f'{mC.name.upper()} State Space')
+    plt.xlim(-1, 1)
+    plt.ylim(-len(state_names)+.5, len(state_names)-.5)
+    plt.show()

@@ -73,6 +73,15 @@ class sensor:
         self.state_name = mC.stateIdx2Name(mC.state)
 
 
+# ---------------------------------------------------------------------
+
+    def reset(self)->None:
+        '''reset the component to its initial state'''
+        self.markov_model.reset()
+        self.sensed_history = []  # reset the history of the sensor
+
+# ---------------------------------------------------------------------
+
     def senseState(self, comp):
         '''
         Determine if the sensor is still able to communicate with the component and update the sensed state accordingly
@@ -84,3 +93,22 @@ class sensor:
         else:
             self.sensed_history.append(self.last_sensed_state)
             return (self.last_sensed_state, 1)  # sensor has failed and gets no more updates from comp
+        
+# ---------------------------------------------------------------------
+
+def main():
+    
+    # Create an instance of the sensor
+    s1 = sensor()
+
+    # Print initial state
+    print(f"Initial state: {s1.state_name}")
+
+    # Update state after 2 days
+    s1.updateState(2)
+
+    # Print updated state
+    print(f"State after 2 days: {s1.state_name}")
+
+if __name__ == "__main__":
+    main()
