@@ -1,4 +1,4 @@
-from markovChain import markovChain
+from shipModel.markovChain import markovChain
 import numpy as np
 
 

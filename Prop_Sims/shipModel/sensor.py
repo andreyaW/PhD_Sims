@@ -1,4 +1,4 @@
-from markovChain import markovChain
+from shipModel.markovChain import markovChain
 import numpy as np
 
 class sensor:
@@ -91,9 +91,6 @@ class sensor:
             return (self.last_sensed_state, 1)  # sensor has failed and gets no more updates from comp
         
 # ---------------------------------------------------------------------
-
-
-
 
 # ---------------------------------------------------------------------
 def main():

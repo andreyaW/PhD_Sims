@@ -197,7 +197,7 @@ class markovChain:
         >>> mc.draw()
 
         """
-        artist.drawStateSpace(self)
+        #artist.drawStateSpace(self)
         artist.plotMarkovChainHistory(self)
         artist.drawMarkovChain(self)
         artist.plotMarkovChainHistory(self)

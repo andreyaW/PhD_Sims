@@ -118,8 +118,7 @@ def plotMarkovChainHistory(mC)->None:
 
 # Sensed Component Functions
 # ----------------------------------------------------------------------------------------------
-
-def drawSensedHistory(sensed_comp, steps):
+def drawSensorAndCompHistory(sensed_comp, steps):
     steps = np.arange(steps)
     component_state_sequence = np.array(sensed_comp.comp.markov_model.history)
     sensor_observation_sequence = [np.array(sensor.sensed_history) for sensor in sensed_comp.sensors]
@@ -135,7 +134,7 @@ def drawSensedHistory(sensed_comp, steps):
 
     # Create the plot
     plt.figure(figsize=(10, 6))
-
+    
     # Plot the component state as a stepped line
     plt.plot(
         steps,
@@ -163,7 +162,7 @@ def drawSensedHistory(sensed_comp, steps):
             color= colors[i],
             alpha=0.6,
             markersize=6,
-            label = "Sensor " + str(i) + " Healthy Readings"
+            label = "Sensor " + str(i+1) + " Healthy Readings"
         )
 
 
@@ -189,7 +188,7 @@ def drawSensedHistory(sensed_comp, steps):
                 color= colors[i],
                 alpha=0.6,
                 markersize=14,
-                label = "Sensor " + str(i) + " Initial Sensor Failure"
+                label = "Sensor " + str(i+1) + " Initial Sensor Failure"
                 )
         
     # arrange the graph to always show all possible component states
@@ -208,9 +207,37 @@ def drawSensedHistory(sensed_comp, steps):
     plt.show()
 
 # ----------------------------------------------------------------------------------------------
+def drawSensedCompHistory(sensed_comp, steps):
+    """
+    A function to plot the history of the Sensed Component
+
+    :param sensed_comp: SensedComponent object
+    :param steps: int number of steps to plot
+    """
+    
+    true_history = np.array([sensed_comp.history[i][0] for i in range(steps)])
+    sensed_history = np.array([sensed_comp.sensed_history[i][0] for i in range(steps)])
+    
+    # Create the plot
+    plt.figure(figsize=(10, 6))
+    plt.plot(sensed_history, 'r.', label="Sensed State", 
+             linewidth=2, alpha=0.8)
+    plt.plot(true_history, label="True State", 
+             drawstyle="steps-post", color="black", 
+             linewidth=2, alpha=0.8)
+    plt.xlabel("Time Step")
+    plt.ylabel("State")
+    # plt.title(f"{sensed_comp.name} Sensed Component History")
+    plt.gca().invert_yaxis()
+    plt.legend()
+    plt.grid()
+    plt.show()
+# ----------------------------------------------------------------------------------------------
 
 
 
+# Markov Chain Functions
+# ----------------------------------------------------------------------------------------------
 def drawStateSpace(mC):
     """
         Draws the state space of the Markov Chain Model
