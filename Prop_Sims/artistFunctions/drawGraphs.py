@@ -118,7 +118,7 @@ def plotMarkovChainHistory(mC)->None:
 
 # Sensed Component Functions
 # ----------------------------------------------------------------------------------------------
-def drawSensorAndCompHistory(sensed_comp, steps):
+def drawSensorAndCompHistory(sensed_comp, steps , ax = None):
     steps = np.arange(steps)
     component_state_sequence = np.array(sensed_comp.comp.markov_model.history)
     sensor_observation_sequence = [np.array(sensor.sensed_history) for sensor in sensed_comp.sensors]
@@ -131,12 +131,15 @@ def drawSensorAndCompHistory(sensed_comp, steps):
     df.to_excel("Component_State_Sequence.xlsx")
     df = pd.DataFrame(sensor_observation_sequence)
     df.to_excel("Sensor_Observation_Sequence.xlsx")
-
-    # Create the plot
-    plt.figure(figsize=(10, 6))
-    
+  
+    # only create a new figure if a figure axis is not given
+    if ax is not None:
+        pass
+    else:
+        fig, ax = plt.subplots(1,1,1)
+        
     # Plot the component state as a stepped line
-    plt.plot(
+    ax.plt.plot(
         steps,
         component_state_sequence,
         label="Component State \n (0=Normal, 1=Degraded, 2=Failed)",
@@ -155,7 +158,7 @@ def drawSensorAndCompHistory(sensed_comp, steps):
         mask = sensor_health_sequence[i] == 0
         healthy_readings = sensor_observation_sequence[i][mask]
         healthy_steps = steps[mask]
-        plt.plot(
+        ax.plt.plot(
             healthy_steps,
             healthy_readings,
             '.', 
@@ -170,7 +173,7 @@ def drawSensorAndCompHistory(sensed_comp, steps):
         mask = sensor_health_sequence[i] == 1
         failed_readings = sensor_observation_sequence[i][mask]
         failed_steps = steps[mask]
-        plt.plot(
+        ax.plt.plot(
             failed_steps,
             failed_readings,
             '--',
@@ -181,7 +184,7 @@ def drawSensorAndCompHistory(sensed_comp, steps):
 
         # plot the intial sensor failure as a X
         if len(failed_steps) > 0:
-            plt.plot(
+            ax.plt.plot(
                 failed_steps[0],
                 failed_readings[0],
                 'X',
@@ -193,21 +196,21 @@ def drawSensorAndCompHistory(sensed_comp, steps):
         
     # arrange the graph to always show all possible component states
     comp_state_space = sensed_comp.comp.markov_model.state_space
-    plt.yticks(range(len(comp_state_space)), labels=["Normal", "Degraded", "Failed"])
+    ax.plt.yticks(range(len(comp_state_space)), labels=["Normal", "Degraded", "Failed"])
 
     # Add labels, title, legend, and grid
-    plt.xlabel("Time Step")
-    plt.ylabel("State")
-    plt.title("Simulation of Component States and Sensor Observations")
+    ax.plt.xlabel("Time Step")
+    ax.plt.ylabel("State")
+    ax.plt.title("Simulation of Component States and Sensor Observations")
     plt.gca().invert_yaxis()
     plt.legend()
     plt.grid()
 
     # Display the plot
-    plt.show()
+    return plt.show()
 
 # ----------------------------------------------------------------------------------------------
-def drawSensedCompHistory(sensed_comp, steps):
+def drawSensedCompHistory(sensed_comp, steps, ax = None):
     """
     A function to plot the history of the Sensed Component
 
@@ -218,15 +221,19 @@ def drawSensedCompHistory(sensed_comp, steps):
     true_history = np.array([sensed_comp.history[i][0] for i in range(steps)])
     sensed_history = np.array([sensed_comp.sensed_history[i][0] for i in range(steps)])
     
-    # Create the plot
-    plt.figure(figsize=(10, 6))
-    plt.plot(sensed_history, 'r.', label="Sensed State", 
-             linewidth=2, alpha=0.8)
-    plt.plot(true_history, label="True State", 
-             drawstyle="steps-post", color="black", 
-             linewidth=2, alpha=0.8)
-    plt.xlabel("Time Step")
-    plt.ylabel("State")
+    # only create a new figure if a figure axis is not given
+    if ax is not None:
+        pass
+    else:
+        fig, ax = plt.subplots(1,1,1)
+
+    ax.plt.plot(sensed_history, 'r.', label="Sensed State", 
+            linewidth=2, alpha=0.8)
+    ax.plt.plot(true_history, label="True State", 
+            drawstyle="steps-post", color="black", 
+            linewidth=2, alpha=0.8)
+    ax.plt.xlabel("Time Step")
+    ax.plt.ylabel("State")
     # plt.title(f"{sensed_comp.name} Sensed Component History")
     plt.gca().invert_yaxis()
     plt.legend()

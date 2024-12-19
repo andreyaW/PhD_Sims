@@ -13,7 +13,6 @@ class sensedComp:
         # self.state = self.determineSensedState()    # set initial state of the sensed component
 
 # ---------------------------------------------------------------------
-
     def grabCurrentStates(self):
         '''check the state of the component and sensors'''
         comp_state = self.comp.state
@@ -29,15 +28,11 @@ class sensedComp:
             for sensor in self.sensors:
                 sensor.updateState(1)
                 sensor.senseState(self.comp)    # sensors must update themselves and get a reading from the comp
-            self.determineSensedState()
-
-        artist.drawSensorAndCompHistory(self, num_steps)
-        artist.drawSensedCompHistory(self, num_steps)
-        self.reset()
+            self.determineSensedState()         # determine the sensed state of the component
 
 # ---------------------------------------------------------------------
     def reset(self):
-        '''reset the component and sensors to initial states'''
+        '''reset the component and sensors to empty history for future steps'''
         self.comp.reset()
         for sensor in self.sensors:
             sensor.reset()
@@ -69,27 +64,6 @@ class sensedComp:
         self.sensed_history.append(self.state)
 
         return self.state
-
-# ---------------------------------------------------------------------
-
-    # def determineSensedState(self):
-    #     '''determine from the last sensed states the assumed state of the sensed component'''
-    #     comp_state, sensor_states = self.grabCurrentStates()
-    #     num_sensor = len(sensor_states)
-
-    #     # if all or majority of sensors are working, then you get the correct sensed state
-    #     if sensor_states.count(0) >= num_sensor/2:
-    #         self.state = (comp_state, 0)
-       
-    #     # if some sensors have failed, use the last sensed states to determine the predicted the component is in
-    #     else:
-    #         last_sensed_states = [self.sensors[i].last_sensed_state for i in range(num_sensor)]
-    #         majority_state = max(set(last_sensed_states), key=last_sensed_states.count)
-    #         self.state = (majority_state, 1)
-    #         self.true_state = (comp_state, 1)
-
-    #     self.history.append(self.state)
-    #     return self.state
         
 # ---------------------------------------------------------------------
     def likelihood(self):
@@ -99,7 +73,6 @@ class sensedComp:
         comp_state, sensor_states = self.checkStates()
         print(comp_state, sensor_states)
         
-
         # get the state probabilities of all possible states
         comp_state_probs = self.comp.state_prob
         sensor_state_probs = [sensor.state_prob for sensor in self.sensors]
@@ -108,16 +81,11 @@ class sensedComp:
         for sensor_state_prob in sensor_state_probs:
             print("Sensor state probs: ", sensor_state_prob)
 
-
         # # calculate the likelihood of the sensor readings given the true state of the component
         # likelihood = 1
         # for sensor_state in sensor_states:
         #     likelihood *= self.sensors[sensor_state].state_prob[comp_state]
         # print (likelihood)
-
-
-
-
 
 # ---------------------------------------------------------------------
 def main():        
