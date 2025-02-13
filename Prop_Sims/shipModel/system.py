@@ -16,7 +16,6 @@ class system:
             :param parallel_connections: list of tuples the list of parallel connections within the system. EX: [(2,3,4)] results in a system with components #2, #3 and #4 within the system are considered to be operating in parallel with each other.  
         
         """
-
         self.state = self.defineSystem(sensed_comps, parallel_connections)
 
 # ---------------------------------------------------------------------

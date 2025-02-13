@@ -21,12 +21,12 @@ class sensor:
     '''
 
     def __init__(self, accuracy=0.98):
-        """
+        '''
         Initialize a sensor object represented as a Markov Chain
 
         :params accuracy: float the probability of the sensor detecting state correctly
                                 the default is a good sensor (high accuracy)
-        """
+        '''
         self.name = "sensor"
         self.accuracy = accuracy   
         self.defineMarkovModel()
@@ -35,10 +35,10 @@ class sensor:
         
 # ---------------------------------------------------------------------
     def defineMarkovModel(self)-> None:
-        """
+        '''
         Creates a model for self using a markov chain object
-        """
-        
+        '''
+
         # initialize the sensor as a 2 state markov sensor model
         num_states= 2
         transition_mat = np.array([[self.accuracy, (1.0 -self.accuracy)],
@@ -56,11 +56,11 @@ class sensor:
         
 # ---------------------------------------------------------------------
     def updateState(self, num_days)-> None:
-        """
+        '''
         Predicts the true state of self after a given number of days
         
         :param num_days: int number of days to predict ahead from current state
-        """
+        '''
 
         # update the markov model
         mC = self.markov_model
@@ -91,6 +91,7 @@ class sensor:
             return (self.last_sensed_state, 1)  # sensor has failed and gets no more updates from comp
         
 # ---------------------------------------------------------------------
+
 
 # ---------------------------------------------------------------------
 def main():
